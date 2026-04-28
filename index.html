@@ -191,47 +191,65 @@
       right: 12px;
       bottom: 12px;
       pointer-events: none;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: end;
-      gap: 12px;
+      gap: 10px;
     }
     .joybox {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: rgba(8,18,30,.34);
-      border: 1px solid rgba(114,167,222,.18);
-      backdrop-filter: blur(6px);
+      width: min(44vw, 176px);
+      height: min(48vw, 196px);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 72% 78%, rgba(77,212,255,.24), transparent 34%),
+        rgba(8,18,30,.42);
+      border: 1px solid rgba(114,167,222,.26);
+      backdrop-filter: blur(7px);
       position: relative;
       pointer-events: auto;
       touch-action: none;
+      box-shadow: inset 0 0 24px rgba(77,212,255,.08), 0 12px 28px rgba(0,0,0,.25);
+    }
+    .joybox::after {
+      content: '右手飞行盘';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 10px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(210,235,255,.7);
+      letter-spacing: .5px;
     }
     .joyring {
       position: absolute;
-      inset: 18px;
-      border: 1px dashed rgba(180,220,255,.22);
-      border-radius: 50%;
+      inset: 15px;
+      border: 1px dashed rgba(180,220,255,.24);
+      border-radius: 22px;
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(180,220,255,.12) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(180,220,255,.12) 50%, transparent 51%);
     }
     .joystick {
       position: absolute;
-      width: 52px;
-      height: 52px;
-      left: 44px;
-      top: 44px;
+      width: 46px;
+      height: 46px;
+      left: calc(50% - 23px);
+      top: calc(50% - 23px);
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #78e4ff, #1b8dff 70%);
-      box-shadow: 0 0 22px rgba(77,212,255,.35);
+      background: radial-gradient(circle at 30% 30%, #ffffff, #78e4ff 38%, #1b8dff 78%);
+      box-shadow: 0 0 24px rgba(77,212,255,.52), 0 8px 18px rgba(0,0,0,.3);
       transform: translate(0, 0);
+      will-change: transform;
     }
     .action-pill {
-      pointer-events: auto;
+      pointer-events: none;
       border-radius: 16px;
-      padding: 12px 14px;
-      background: rgba(8,18,30,.34);
-      border: 1px solid rgba(114,167,222,.18);
+      padding: 11px 12px;
+      background: rgba(8,18,30,.30);
+      border: 1px solid rgba(114,167,222,.16);
       backdrop-filter: blur(6px);
       text-align: right;
-      max-width: 50%;
+      max-width: 46%;
       font-size: 12px;
       color: var(--sub);
     }
@@ -253,14 +271,14 @@
       .desktop-only { display: none; }
       .footer-note { font-size: 12px; }
       .mobile-controls { display: flex; }
-      .action-pill { max-width: 54%; }
+      .action-pill { max-width: 42%; font-size: 11px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1 class="title">是男人就抗住20秒</h1>
-    <p class="subtitle">移动端已优化：左下摇杆控制飞机，右下空白区不易误触重开。</p>
+    <p class="subtitle">移动端已优化：右手飞行盘指哪飞哪，开局音效/触感更明显。</p>
     <div class="game-shell">
       <canvas id="game" width="880" height="550"></canvas>
       <div class="hud">
@@ -271,15 +289,15 @@
         </div>
         <div class="center-panel" id="overlay"></div>
         <div class="mobile-controls" id="mobileControls">
-          <div class="joybox" id="joybox" aria-label="虚拟摇杆">
+          <div class="action-pill">右手拇指在飞行盘里拖动<br>飞机会直接跟到对应位置</div>
+          <div class="joybox" id="joybox" aria-label="右手飞行盘：指哪飞哪">
             <div class="joyring"></div>
             <div class="joystick" id="joystick"></div>
           </div>
-          <div class="action-pill">右侧轻触/拖动=微调移动<br>松手回中，适合单手操作</div>
         </div>
       </div>
     </div>
-    <div class="footer-note"><span class="desktop-only">支持方向键 / WASD 移动。按空格开始，按 R 重开。</span><span class="mobile-only">开始后左下摇杆控制飞机，避免手指遮挡机身。</span></div>
+    <div class="footer-note"><span class="desktop-only">支持方向键 / WASD 移动。按空格开始，按 R 重开。</span><span class="mobile-only">开始后用右下飞行盘控制飞机，适合右手单手玩。</span></div>
   </div>
 
   <script>
@@ -314,8 +332,9 @@
     }
 
     function vibrate(pattern) {
-      if (!('vibrate' in navigator)) return;
-      try { navigator.vibrate(pattern); } catch (_) {}
+      // 真实设备边界：iOS Safari/多数桌面浏览器不支持；安卓 Chrome 常见可用，且通常需要用户手势后触发。
+      if (!('vibrate' in navigator)) return false;
+      try { return navigator.vibrate(pattern); } catch (_) { return false; }
     }
 
     function ensureAudio() {
@@ -326,7 +345,7 @@
       return audioCtx;
     }
 
-    function beep(freq = 440, duration = 0.08, type = 'sine', gainValue = 0.045, delay = 0) {
+    function beep(freq = 440, duration = 0.08, type = 'sine', gainValue = 0.12, delay = 0) {
       const ac = ensureAudio();
       if (!ac) return;
       const t = ac.currentTime + delay;
@@ -345,18 +364,18 @@
 
     function feedback(kind) {
       if (kind === 'start') {
-        vibrate(18);
-        beep(520, 0.07, 'triangle');
-        beep(760, 0.08, 'triangle', 0.04, 0.08);
+        vibrate([45, 25, 45]);
+        beep(440, 0.12, 'triangle', 0.13);
+        beep(720, 0.16, 'triangle', 0.16, 0.10);
       } else if (kind === 'hit') {
-        vibrate([60, 35, 90]);
-        beep(180, 0.18, 'sawtooth', 0.055);
-        beep(95, 0.22, 'square', 0.04, 0.12);
+        vibrate([120, 60, 180]);
+        beep(155, 0.26, 'sawtooth', 0.18);
+        beep(78, 0.34, 'square', 0.11, 0.12);
       } else if (kind === 'win') {
-        vibrate([30, 30, 30]);
-        beep(660, 0.08, 'triangle');
-        beep(880, 0.08, 'triangle', 0.045, 0.09);
-        beep(1180, 0.14, 'triangle', 0.045, 0.18);
+        vibrate([55, 45, 55, 45, 110]);
+        beep(620, 0.13, 'triangle', 0.14);
+        beep(880, 0.15, 'triangle', 0.15, 0.12);
+        beep(1240, 0.22, 'triangle', 0.15, 0.26);
       } else if (kind === 'record') {
         vibrate([20, 25, 50]);
         beep(980, 0.09, 'sine', 0.035);
@@ -376,12 +395,13 @@
       stars: [],
       bullets: [],
       keys: Object.create(null),
-      touch: { active: false, x: 0, y: 0, id: null },
+      touch: { active: false, x: 0, y: 0, id: null, snap: false },
       joy: { active: false, id: null, x: 0, y: 0, dx: 0, dy: 0 },
+      particles: [],
       lastTime: 0,
       uiLockUntil: 0,
       best: 0,
-      player: { x: 0, y: 0, width: 32, height: 36, speed: 290 }
+      player: { x: 0, y: 0, width: 32, height: 36, speed: 420, vx: 0, vy: 0, tilt: 0 }
     };
 
     function resetStars() {
@@ -392,6 +412,7 @@
         r: Math.random() * (isMobile ? 1.3 : 1.8) + 0.3,
         speed: Math.random() * (isMobile ? 12 : 18) + 8,
         alpha: Math.random() * 0.7 + 0.2,
+        layer: Math.random(),
       }));
     }
 
@@ -409,6 +430,8 @@
       GAME.bullets = [];
       GAME.touch.active = false;
       GAME.touch.id = null;
+      GAME.touch.snap = false;
+      GAME.particles = [];
       GAME.joy.active = false;
       GAME.joy.id = null;
       GAME.joy.dx = 0;
@@ -427,12 +450,12 @@
           <h2>顶住 20 秒</h2>
           <p>当前最佳：<strong class="ok">${GAME.best.toFixed(1)}s</strong></p>
           <p>你驾驶一架小飞机，四面八方的子弹会随机飞来。</p>
-          <p><span class="desktop-only">使用 <strong>方向键</strong> 或 <strong>WASD</strong> 躲避弹幕。</span><span class="mobile-only">手机端用左下 <strong>虚拟摇杆</strong> 控制飞机，右侧可点按微调。</span><strong>撑满 20 秒即胜利</strong>。</p>
+          <p><span class="desktop-only">使用 <strong>方向键</strong> 或 <strong>WASD</strong> 躲避弹幕。</span><span class="mobile-only">手机端用右下 <strong>右手飞行盘</strong> 指哪飞哪。</span><strong>撑满 20 秒即胜利</strong>。</p>
           <div class="controls">
             <span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>
           </div>
-          <button id="startBtn">开始硬抗</button>
-          <div class="hint"><span class="desktop-only">也可直接按空格 / 回车开始；本地会自动保存最佳成绩</span><span class="mobile-only">开局后先别急，摇杆轻推更稳；本地会自动保存最佳成绩</span></div>
+          <button id="startBtn">开启音效/触感并开始</button>
+          <div class="hint"><span class="desktop-only">也可直接按空格 / 回车开始；本地会自动保存最佳成绩</span><span class="mobile-only">首次点击会解锁浏览器音频；震动仅在支持 Vibration API 的安卓/部分浏览器生效</span></div>
         </div>`;
       document.getElementById('startBtn').onclick = startCountdown;
     }
@@ -473,6 +496,7 @@
 
     function startCountdown() {
       if (GAME.state !== 'ready') return;
+      ensureAudio();
       feedback('start');
       GAME.state = 'countdown';
       GAME.countdown = 3;
@@ -522,23 +546,24 @@
     }
 
     function updatePlayer(dt) {
-      if (GAME.joy.active) {
-        const accel = isMobile ? 220 : 300;
-        GAME.player.x += GAME.joy.dx * accel * dt;
-        GAME.player.y += GAME.joy.dy * accel * dt;
-      } else if (GAME.touch.active) {
+      const prevX = GAME.player.x;
+      const prevY = GAME.player.y;
+      if (GAME.touch.active) {
         const targetX = GAME.touch.x - GAME.player.width / 2;
         const targetY = GAME.touch.y - GAME.player.height / 2;
         const dx = targetX - GAME.player.x;
         const dy = targetY - GAME.player.y;
         const dist = Math.hypot(dx, dy);
-        const maxStep = GAME.player.speed * 1.15 * dt;
-        if (dist <= maxStep || dist < 1) {
+        // 指哪飞哪：首帧直接贴近，之后用高响应插值 + 大步长，避免“慢半拍”。
+        const follow = GAME.touch.snap ? 1 : Math.min(1, dt * (isMobile ? 42 : 34));
+        const maxStep = (isMobile ? 1400 : 1100) * dt;
+        if (GAME.touch.snap || dist <= maxStep || dist < 1) {
           GAME.player.x = targetX;
           GAME.player.y = targetY;
+          GAME.touch.snap = false;
         } else {
-          GAME.player.x += (dx / dist) * maxStep;
-          GAME.player.y += (dy / dist) * maxStep;
+          GAME.player.x += Math.max(-maxStep, Math.min(maxStep, dx * follow));
+          GAME.player.y += Math.max(-maxStep, Math.min(maxStep, dy * follow));
         }
       } else {
         const { dx, dy } = getMoveAxis();
@@ -547,6 +572,10 @@
       }
       GAME.player.x = Math.max(0, Math.min(GAME.width - GAME.player.width, GAME.player.x));
       GAME.player.y = Math.max(0, Math.min(GAME.height - GAME.player.height, GAME.player.y));
+      GAME.player.vx = (GAME.player.x - prevX) / Math.max(dt, 0.001);
+      GAME.player.vy = (GAME.player.y - prevY) / Math.max(dt, 0.001);
+      const targetTilt = Math.max(-0.52, Math.min(0.52, GAME.player.vx / 760));
+      GAME.player.tilt += (targetTilt - GAME.player.tilt) * Math.min(1, dt * 12);
     }
 
     function levelFromTime(t) { return Math.min(10, 1 + Math.floor(t / 2.4)); }
@@ -585,7 +614,9 @@
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             r: isMobile ? 4.2 + Math.random() * 2.2 : 5 + Math.random() * 3,
-            hue: Math.random() > 0.82 ? 42 : 5
+            hue: Math.random() > 0.82 ? 42 : 5,
+            depth: 0.65 + Math.random() * 0.7,
+            spin: Math.random() * Math.PI
           });
         }
       }
@@ -595,8 +626,19 @@
       for (const b of GAME.bullets) {
         b.x += b.vx * dt;
         b.y += b.vy * dt;
+        b.spin += dt * 8;
       }
       GAME.bullets = GAME.bullets.filter(b => b.x > -40 && b.x < GAME.width + 40 && b.y > -40 && b.y < GAME.height + 40);
+    }
+
+    function updateParticles(dt) {
+      const px = GAME.player.x + GAME.player.width / 2;
+      const py = GAME.player.y + GAME.player.height * 0.83;
+      if (GAME.state === 'playing' || GAME.state === 'countdown') {
+        GAME.particles.push({ x: px + (Math.random() - 0.5) * 8, y: py, vx: -GAME.player.vx * 0.025 + (Math.random() - 0.5) * 16, vy: 70 + Math.random() * 55, life: 0.34, max: 0.34, r: 2 + Math.random() * 2.4 });
+      }
+      for (const p of GAME.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }
+      GAME.particles = GAME.particles.filter(p => p.life > 0);
     }
 
     function circleRectHit(cx, cy, r, rx, ry, rw, rh) {
@@ -631,69 +673,135 @@
     function drawBackground() {
       ctx.clearRect(0, 0, GAME.width, GAME.height);
       const g = ctx.createLinearGradient(0, 0, 0, GAME.height);
-      g.addColorStop(0, '#0a1930');
-      g.addColorStop(1, '#040a14');
+      g.addColorStop(0, '#10264a');
+      g.addColorStop(0.48, '#07182b');
+      g.addColorStop(1, '#030811');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, GAME.width, GAME.height);
 
-      const gridStep = isMobile ? 56 : 40;
-      const lineAlpha = isMobile ? 0.05 : 0.08;
+      const cx = GAME.width / 2;
+      const horizon = GAME.height * 0.22;
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      const glow = ctx.createRadialGradient(cx, horizon, 10, cx, horizon, GAME.width * 0.75);
+      glow.addColorStop(0, 'rgba(77,212,255,.38)');
+      glow.addColorStop(1, 'rgba(77,212,255,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, GAME.width, GAME.height);
+      ctx.restore();
+
       for (const s of GAME.stars) {
-        ctx.globalAlpha = s.alpha;
-        ctx.fillStyle = '#c7e8ff';
+        const depth = 0.55 + s.layer * 1.5;
+        ctx.globalAlpha = s.alpha * (0.55 + s.layer * 0.6);
+        ctx.fillStyle = s.layer > 0.72 ? '#ffffff' : '#9edcff';
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, s.r * depth, 0, Math.PI * 2);
+        ctx.fill();
+        if (s.layer > 0.62) {
+          ctx.globalAlpha *= 0.35;
+          ctx.fillRect(s.x - 0.5, s.y - s.speed * 0.018, 1, s.speed * 0.06);
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      // 伪透视跑道网格：线条向地平线收束，增强纵深和速度感。
+      ctx.strokeStyle = `rgba(120,210,255,${isMobile ? 0.11 : 0.14})`;
+      ctx.lineWidth = 1;
+      for (let i = -9; i <= 9; i++) {
+        const bottomX = cx + i * (GAME.width / 12);
+        ctx.beginPath();
+        ctx.moveTo(cx + i * 8, horizon);
+        ctx.lineTo(bottomX, GAME.height);
+        ctx.stroke();
+      }
+      for (let k = 0; k < 12; k++) {
+        const t = k / 11;
+        const y = horizon + Math.pow(t, 1.85) * (GAME.height - horizon);
+        const half = 20 + Math.pow(t, 1.55) * GAME.width * 0.62;
+        ctx.globalAlpha = 0.18 + t * 0.22;
+        ctx.beginPath();
+        ctx.moveTo(cx - half, y);
+        ctx.lineTo(cx + half, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawParticles() {
+      for (const p of GAME.particles) {
+        const a = Math.max(0, p.life / p.max);
+        ctx.globalAlpha = a * 0.75;
+        ctx.fillStyle = a > 0.55 ? '#7df0ff' : '#ff9d3d';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * (1.2 - a * 0.35), 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = `rgba(120,170,220,${lineAlpha})`;
-      ctx.lineWidth = 1;
-      for (let x = 0; x < GAME.width; x += gridStep) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, GAME.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < GAME.height; y += gridStep) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(GAME.width, y);
-        ctx.stroke();
-      }
     }
 
     function drawPlayer() {
       const { x, y, width, height } = GAME.player;
       ctx.save();
       ctx.translate(x + width / 2, y + height / 2);
-      ctx.shadowBlur = isMobile ? 10 : 18;
-      ctx.shadowColor = 'rgba(77,212,255,.45)';
-      ctx.fillStyle = '#59d8ff';
+      ctx.rotate(GAME.player.tilt);
+      ctx.transform(1, 0.05 * Math.sin(GAME.player.tilt), 0, 1, 0, 0);
+      ctx.shadowBlur = isMobile ? 14 : 22;
+      ctx.shadowColor = 'rgba(77,212,255,.62)';
+      const body = ctx.createLinearGradient(0, -height / 2, 0, height / 2);
+      body.addColorStop(0, '#e9fcff');
+      body.addColorStop(0.36, '#59d8ff');
+      body.addColorStop(1, '#126cff');
+      ctx.fillStyle = body;
       ctx.beginPath();
-      ctx.moveTo(0, -height / 2);
-      ctx.lineTo(width / 2, height / 2);
+      ctx.moveTo(0, -height / 2 - 3);
+      ctx.lineTo(width / 2 + 4, height / 2 - 1);
       ctx.lineTo(0, height / 4);
-      ctx.lineTo(-width / 2, height / 2);
+      ctx.lineTo(-width / 2 - 4, height / 2 - 1);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = '#e9fcff';
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,.45)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(240,252,255,.95)';
       ctx.beginPath();
-      ctx.arc(0, -4, 4.5, 0, Math.PI * 2);
+      ctx.ellipse(0, -6, 5.5, 7.5, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#1ba8ff';
-      ctx.fillRect(-3, height / 4, 6, 10);
+      ctx.fillStyle = '#ffb347';
+      ctx.beginPath();
+      ctx.moveTo(-5, height / 2 - 1);
+      ctx.lineTo(0, height / 2 + 14 + Math.random() * 5);
+      ctx.lineTo(5, height / 2 - 1);
+      ctx.closePath();
+      ctx.fill();
       ctx.restore();
     }
 
     function drawBullets() {
       for (const b of GAME.bullets) {
         const color = b.hue === 42 ? '#ffcb52' : '#ff5a5a';
-        ctx.shadowBlur = isMobile ? 6 : 12;
+        const rr = b.r * b.depth;
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(Math.atan2(b.vy, b.vx));
+        ctx.shadowBlur = isMobile ? 9 : 16;
         ctx.shadowColor = color;
+        const trail = ctx.createLinearGradient(-rr * 4.8, 0, rr, 0);
+        trail.addColorStop(0, 'rgba(255,90,90,0)');
+        trail.addColorStop(1, color);
+        ctx.fillStyle = trail;
+        ctx.beginPath();
+        ctx.ellipse(-rr * 1.8, 0, rr * 3.2, rr * 0.62, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.arc(0, 0, rr, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.55)';
+        ctx.beginPath();
+        ctx.arc(rr * -0.22, -rr * 0.28, rr * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
       ctx.shadowBlur = 0;
     }
@@ -708,7 +816,7 @@
       ctx.restore();
     }
 
-    function render() { drawBackground(); drawBullets(); drawPlayer(); drawCountdownVisual(); }
+    function render() { drawBackground(); drawParticles(); drawBullets(); drawPlayer(); drawCountdownVisual(); }
 
     function updateHUD() {
       timeText.textContent = `${GAME.elapsed.toFixed(1)}s`;
@@ -722,6 +830,7 @@
       const dt = Math.min(0.033, (timestamp - GAME.lastTime) / 1000);
       GAME.lastTime = timestamp;
       updateStars(dt);
+      updateParticles(dt);
       if (GAME.state === 'countdown') {
         GAME.countdown -= dt;
         if (GAME.countdown <= 0) startPlaying();
@@ -751,20 +860,19 @@
       GAME.touch.y = Math.max(0, Math.min(GAME.height, p.y));
     }
 
-    function updateJoystickFromPoint(clientX, clientY) {
+    function setTouchTargetFromPad(clientX, clientY, snap = false) {
       const rect = joybox.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = clientX - cx;
-      const dy = clientY - cy;
-      const radius = rect.width * 0.28;
-      const dist = Math.hypot(dx, dy);
-      const clamped = dist > radius ? radius / dist : 1;
-      const x = dx * clamped;
-      const y = dy * clamped;
-      GAME.joy.dx = x / radius;
-      GAME.joy.dy = y / radius;
-      joystick.style.transform = `translate(${x}px, ${y}px)`;
+      const localX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+      const localY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+      const nx = localX / rect.width;
+      const ny = localY / rect.height;
+      // 右手飞行盘不是慢速摇杆，而是全屏位置映射：拇指在盘内的位置 = 飞机在战场对应位置。
+      GAME.touch.x = nx * GAME.width;
+      GAME.touch.y = ny * GAME.height;
+      GAME.touch.snap = snap;
+      const visualX = localX - rect.width / 2;
+      const visualY = localY - rect.height / 2;
+      joystick.style.transform = `translate(${visualX}px, ${visualY}px)`;
     }
 
     canvas.addEventListener('pointerdown', (e) => {
@@ -778,6 +886,7 @@
       if (GAME.state === 'playing' || GAME.state === 'countdown') {
         GAME.touch.active = true;
         GAME.touch.id = e.pointerId;
+        GAME.touch.snap = true;
         setTouchTarget(e);
       }
     }, { passive: false });
@@ -785,6 +894,7 @@
     canvas.addEventListener('pointermove', (e) => {
       if (!GAME.touch.active || GAME.touch.id !== e.pointerId) return;
       e.preventDefault();
+      GAME.touch.snap = false;
       setTouchTarget(e);
     }, { passive: false });
 
@@ -792,6 +902,7 @@
       if (GAME.touch.id === e.pointerId) {
         GAME.touch.active = false;
         GAME.touch.id = null;
+        GAME.touch.snap = false;
       }
     }
 
@@ -801,16 +912,19 @@
     joybox.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       joybox.setPointerCapture?.(e.pointerId);
+      ensureAudio();
       if (GAME.state === 'ready') startCountdown();
       if (GAME.state === 'gameover' || GAME.state === 'win') return;
       GAME.joy.active = true;
       GAME.joy.id = e.pointerId;
-      updateJoystickFromPoint(e.clientX, e.clientY);
+      GAME.touch.active = true;
+      GAME.touch.id = e.pointerId;
+      setTouchTargetFromPad(e.clientX, e.clientY, true);
     }, { passive: false });
     joybox.addEventListener('pointermove', (e) => {
       if (!GAME.joy.active || GAME.joy.id !== e.pointerId) return;
       e.preventDefault();
-      updateJoystickFromPoint(e.clientX, e.clientY);
+      setTouchTargetFromPad(e.clientX, e.clientY, false);
     }, { passive: false });
     function releaseJoystick(e) {
       if (GAME.joy.id !== e.pointerId) return;
@@ -818,6 +932,11 @@
       GAME.joy.id = null;
       GAME.joy.dx = 0;
       GAME.joy.dy = 0;
+      if (GAME.touch.id === e.pointerId) {
+        GAME.touch.active = false;
+        GAME.touch.id = null;
+        GAME.touch.snap = false;
+      }
       joystick.style.transform = 'translate(0px, 0px)';
     }
     joybox.addEventListener('pointerup', releaseJoystick);
