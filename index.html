@@ -5,964 +5,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
   <title>是男人就抗住20秒</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #06111f;
-      --panel: #0d1b2a;
-      --line: #25415f;
-      --text: #eef6ff;
-      --sub: #9bb2c9;
-      --accent: #4dd4ff;
-      --danger: #ff5f5f;
-      --warn: #ffbf47;
-      --ok: #57e389;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      overscroll-behavior: none;
-      background:
-        radial-gradient(circle at top, rgba(77,212,255,.14), transparent 28%),
-        linear-gradient(180deg, #081320 0%, #050b14 100%);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    }
-    .wrap {
-      width: min(100vw, 920px);
-      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-    }
-    .title {
-      text-align: center;
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      margin: 0 0 10px;
-      color: var(--text);
-      text-shadow: 0 0 12px rgba(77,212,255,.25);
-    }
-    .subtitle {
-      text-align: center;
-      color: var(--sub);
-      margin: 0 0 10px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .game-shell {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      max-height: min(70svh, 550px);
-      background: linear-gradient(180deg, rgba(10,22,40,.95), rgba(5,11,20,.96));
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,.45);
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: transparent;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .hud {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-    .topbar {
-      position: absolute;
-      top: 12px;
-      left: 14px;
-      right: 14px;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      font-weight: 700;
-      text-shadow: 0 0 10px rgba(0,0,0,.35);
-    }
-    .badge {
-      background: rgba(4,10,18,.52);
-      border: 1px solid rgba(118,160,210,.22);
-      border-radius: 999px;
-      padding: 8px 12px;
-      backdrop-filter: blur(6px);
-      font-size: 14px;
-    }
-    .badge strong { color: var(--accent); }
-    .topbar .badge:nth-child(2) strong { color: var(--warn); }
-    .topbar .badge:nth-child(3) strong { color: var(--ok); }
-    .ok { color: var(--ok); }
-    .danger { color: var(--danger); }
-    .record-burst {
-      display: inline-block;
-      margin: 8px 0 2px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(87,227,137,.13);
-      border: 1px solid rgba(87,227,137,.3);
-      color: var(--ok);
-      font-weight: 900;
-    }
-    .center-panel {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: linear-gradient(180deg, rgba(4,10,18,.12), rgba(4,10,18,.36));
-    }
-    .dialog {
-      width: min(92%, 520px);
-      padding: 24px 24px 20px;
-      border-radius: 18px;
-      background: rgba(5,12,22,.84);
-      border: 1px solid rgba(110,160,220,.24);
-      backdrop-filter: blur(8px);
-      text-align: center;
-      box-shadow: 0 14px 40px rgba(0,0,0,.42);
-      pointer-events: auto;
-    }
-    .dialog h2 {
-      margin: 0 0 10px;
-      font-size: 28px;
-    }
-    .dialog p {
-      margin: 8px 0;
-      color: var(--sub);
-      line-height: 1.6;
-      font-size: 15px;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .key {
-      border: 1px solid rgba(134,176,224,.28);
-      background: rgba(11,24,42,.9);
-      border-radius: 10px;
-      padding: 8px 12px;
-      min-width: 54px;
-      font-weight: 800;
-      color: var(--text);
-      box-shadow: inset 0 -2px 0 rgba(255,255,255,.04);
-    }
-    button {
-      pointer-events: auto;
-      margin-top: 18px;
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: 800;
-      background: linear-gradient(180deg, #31c8ff, #1297ff);
-      color: #041018;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(18,151,255,.32);
-    }
-    .hint {
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--sub);
-      line-height: 1.45;
-    }
-    .mobile-only { display: none; }
-    .footer-note {
-      margin-top: 12px;
-      color: #6f8398;
-      font-size: 12px;
-      text-align: center;
-      line-height: 1.45;
-    }
-    .mobile-controls {
-      display: none;
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      pointer-events: none;
-      justify-content: flex-end;
-      align-items: end;
-      gap: 10px;
-    }
-    .joybox {
-      width: min(44vw, 176px);
-      height: min(48vw, 196px);
-      border-radius: 28px;
-      background:
-        radial-gradient(circle at 72% 78%, rgba(77,212,255,.24), transparent 34%),
-        rgba(8,18,30,.42);
-      border: 1px solid rgba(114,167,222,.26);
-      backdrop-filter: blur(7px);
-      position: relative;
-      pointer-events: auto;
-      touch-action: none;
-      box-shadow: inset 0 0 24px rgba(77,212,255,.08), 0 12px 28px rgba(0,0,0,.25);
-    }
-    .joybox::after {
-      content: '右手飞行盘';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 10px;
-      text-align: center;
-      font-size: 11px;
-      color: rgba(210,235,255,.7);
-      letter-spacing: .5px;
-    }
-    .joyring {
-      position: absolute;
-      inset: 15px;
-      border: 1px dashed rgba(180,220,255,.24);
-      border-radius: 22px;
-      background:
-        linear-gradient(90deg, transparent 49%, rgba(180,220,255,.12) 50%, transparent 51%),
-        linear-gradient(0deg, transparent 49%, rgba(180,220,255,.12) 50%, transparent 51%);
-    }
-    .joystick {
-      position: absolute;
-      width: 46px;
-      height: 46px;
-      left: calc(50% - 23px);
-      top: calc(50% - 23px);
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #ffffff, #78e4ff 38%, #1b8dff 78%);
-      box-shadow: 0 0 24px rgba(77,212,255,.52), 0 8px 18px rgba(0,0,0,.3);
-      transform: translate(0, 0);
-      will-change: transform;
-    }
-    .action-pill {
-      pointer-events: none;
-      border-radius: 16px;
-      padding: 11px 12px;
-      background: rgba(8,18,30,.30);
-      border: 1px solid rgba(114,167,222,.16);
-      backdrop-filter: blur(6px);
-      text-align: right;
-      max-width: 46%;
-      font-size: 12px;
-      color: var(--sub);
-    }
-    @media (max-width: 640px) {
-      body { align-items: start; }
-      .wrap { padding-top: max(10px, env(safe-area-inset-top)); }
-      .title { font-size: clamp(24px, 7vw, 30px); margin-bottom: 8px; }
-      .subtitle { font-size: 12px; margin-bottom: 8px; }
-      .game-shell { aspect-ratio: 10 / 14; max-height: calc(100svh - 144px); border-radius: 14px; }
-      .topbar { top: 8px; left: 8px; right: 8px; gap: 6px; }
-      .badge { font-size: 12px; padding: 7px 9px; }
-      .center-panel { padding: 14px; }
-      .dialog { width: 100%; padding: 18px 14px 16px; border-radius: 16px; }
-      .dialog h2 { font-size: 23px; }
-      .dialog p { font-size: 14px; line-height: 1.5; }
-      .controls { display: none; }
-      button { width: 100%; min-height: 46px; font-size: 16px; }
-      .mobile-only { display: inline; }
-      .desktop-only { display: none; }
-      .footer-note { font-size: 12px; }
-      .mobile-controls { display: flex; }
-      .action-pill { max-width: 42%; font-size: 11px; }
-    }
+    :root{color-scheme:dark;--bg:#06111f;--panel:#0c1725;--line:#26415d;--text:#eef6ff;--sub:#9ab0c6;--accent:#57d9ff;--danger:#ff6a6a;--warn:#ffbf47;--ok:#66e39a;--muted:#6f8398}
+    *{box-sizing:border-box} body{margin:0;min-height:100svh;overflow:hidden;overscroll-behavior:none;background:radial-gradient(circle at top,rgba(87,217,255,.14),transparent 28%),linear-gradient(180deg,#081320 0%,#050b14 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+    .wrap{width:min(100vw,960px);padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));margin:0 auto}
+    .title{text-align:center;margin:0 0 8px;font-size:clamp(24px,5vw,34px);font-weight:900;letter-spacing:1px;text-shadow:0 0 12px rgba(87,217,255,.2)}
+    .subtitle{text-align:center;margin:0 0 10px;color:var(--sub);font-size:14px;line-height:1.5}
+    .game-shell{position:relative;width:100%;aspect-ratio:16/10;max-height:min(72svh,560px);background:linear-gradient(180deg,rgba(10,22,40,.95),rgba(5,11,20,.96));border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 18px 58px rgba(0,0,0,.44)}
+    canvas{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+    .hud{position:absolute;inset:0;pointer-events:none}
+    .topbar{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;font-weight:700;text-shadow:0 0 10px rgba(0,0,0,.35)}
+    .badge{background:rgba(4,10,18,.54);border:1px solid rgba(118,160,210,.22);border-radius:999px;padding:8px 12px;backdrop-filter:blur(6px);font-size:13px}
+    .badge strong{color:var(--accent)} .badge.mode strong{color:var(--warn)} .badge.score strong{color:var(--ok)}
+    .center-panel{position:absolute;inset:0;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,rgba(4,10,18,.10),rgba(4,10,18,.34));pointer-events:none}
+    .dialog{width:min(92%,560px);padding:22px 20px 18px;border-radius:18px;background:rgba(5,12,22,.86);border:1px solid rgba(110,160,220,.24);backdrop-filter:blur(8px);text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.42);pointer-events:auto}.share-card{position:relative;overflow:hidden;background:radial-gradient(circle at top,rgba(87,217,255,.18),transparent 38%),linear-gradient(180deg,rgba(7,16,29,.96),rgba(4,10,18,.96));border:1px solid rgba(87,217,255,.24)}.share-badge{display:inline-block;margin:0 0 10px;padding:8px 12px;border-radius:999px;background:rgba(102,227,154,.12);border:1px solid rgba(102,227,154,.32);color:var(--ok);font-weight:900;letter-spacing:.5px}.share-hero{margin:2px 0 8px;font-size:clamp(34px,7vw,54px);font-weight:1000;line-height:1.02;color:#fff;text-shadow:0 0 18px rgba(87,217,255,.24)}.share-sub{margin:0 0 10px;color:var(--sub);font-size:14px;line-height:1.55}.share-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 8px}.share-stat{padding:10px 12px;border-radius:14px;background:rgba(7,16,29,.72);border:1px solid rgba(118,160,210,.18);text-align:left}.share-stat .k{display:block;color:var(--sub);font-size:12px;margin-bottom:4px}.share-stat .v{font-size:18px;font-weight:900;color:var(--text)}.share-quote{margin:10px 0 0;padding:10px 12px;border-radius:14px;background:rgba(87,217,255,.08);border:1px solid rgba(87,217,255,.18);color:#dff8ff;font-size:13px;line-height:1.5;text-align:left}.share-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.share-actions button{margin-top:0;min-width:120px}
+    .dialog h2{margin:0 0 10px;font-size:28px}.dialog p{margin:8px 0;color:var(--sub);line-height:1.6;font-size:15px}
+    .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:14px}.key{border:1px solid rgba(134,176,224,.28);background:rgba(11,24,42,.9);border-radius:10px;padding:8px 12px;min-width:54px;font-weight:800}
+    button{pointer-events:auto;margin-top:16px;border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:800;background:linear-gradient(180deg,#31c8ff,#1297ff);color:#041018;cursor:pointer;box-shadow:0 10px 24px rgba(18,151,255,.32)}
+    .hint{margin-top:10px;font-size:13px;color:var(--sub);line-height:1.45}
+    .footer-note{margin-top:12px;color:var(--muted);font-size:12px;text-align:center;line-height:1.45}
+    .mobile-only{display:none}.desktop-only{display:inline}
+    .touch-layer{position:absolute;inset:0;pointer-events:none}
+    .touch-indicator{position:absolute;width:96px;height:96px;margin-left:-48px;margin-top:-48px;border-radius:50%;border:2px solid rgba(87,217,255,.42);background:radial-gradient(circle,rgba(87,217,255,.22),rgba(87,217,255,.04) 55%,transparent 70%);box-shadow:0 0 0 1px rgba(87,217,255,.14),0 0 20px rgba(87,217,255,.16);opacity:0;transform:scale(.7);transition:opacity .12s ease,transform .12s ease}
+    .touch-indicator.active{opacity:1;transform:scale(1)}
+    .status-line{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+    .pill{border:1px solid rgba(118,160,210,.18);border-radius:999px;padding:6px 10px;background:rgba(6,16,28,.5);color:var(--sub);font-size:12px}
+    .pill strong{color:var(--text)}
+    @media (max-width:640px){body{align-items:start}.title{margin-bottom:7px}.subtitle{font-size:12px;margin-bottom:8px}.game-shell{aspect-ratio:10/14;max-height:calc(100svh - 142px);border-radius:14px}.topbar{top:8px;left:8px;right:8px}.badge{font-size:12px;padding:7px 9px}.dialog{width:100%;padding:18px 14px 16px;border-radius:16px}.dialog h2{font-size:23px}.dialog p{font-size:14px;line-height:1.5}.controls{display:none}.mobile-only{display:inline}.desktop-only{display:none}.hint{font-size:12px}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1 class="title">是男人就抗住20秒</h1>
-    <p class="subtitle">移动端已优化：右手飞行盘指哪飞哪，开局音效/触感更明显。</p>
+    <p class="subtitle">动态触控：按住任意区域拖动即可操控；手指不再占住固定左下角。</p>
     <div class="game-shell">
       <canvas id="game" width="880" height="550"></canvas>
       <div class="hud">
         <div class="topbar">
-          <div class="badge">生存时间：<strong id="timeText">0.0s</strong> / 20.0s</div>
-          <div class="badge">最佳：<strong id="bestText">0.0s</strong></div>
-          <div class="badge">压力等级：<strong id="levelText">Lv.1</strong></div>
+          <div class="badge">模式：<strong id="modeText">闯关</strong></div>
+          <div class="badge">关卡：<strong id="stageText">1 / 3</strong></div>
+          <div class="badge score">生存：<strong id="timeText">0.0s</strong> / <strong id="targetText">20.0s</strong></div>
+          <div class="badge">分数：<strong id="scoreText">0</strong></div>
         </div>
         <div class="center-panel" id="overlay"></div>
-        <div class="mobile-controls" id="mobileControls">
-          <div class="action-pill">右手拇指在飞行盘里拖动<br>飞机会直接跟到对应位置</div>
-          <div class="joybox" id="joybox" aria-label="右手飞行盘：指哪飞哪">
-            <div class="joyring"></div>
-            <div class="joystick" id="joystick"></div>
-          </div>
-        </div>
+        <div class="touch-layer"><div id="touchIndicator" class="touch-indicator"></div></div>
       </div>
     </div>
-    <div class="footer-note"><span class="desktop-only">支持方向键 / WASD 移动。按空格开始，按 R 重开。</span><span class="mobile-only">开始后用右下飞行盘控制飞机，适合右手单手玩。</span></div>
+    <div class="footer-note"><span class="desktop-only">支持方向键 / WASD。空格或回车开始，R 重开。</span><span class="mobile-only">按住任意区域拖动控制飞机；松手即停，观察区不再被固定摇杆遮挡。</span></div>
   </div>
-
-  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const overlay = document.getElementById('overlay');
-    const timeText = document.getElementById('timeText');
-    const levelText = document.getElementById('levelText');
-    const bestText = document.getElementById('bestText');
-    const joybox = document.getElementById('joybox');
-    const joystick = document.getElementById('joystick');
-    const isMobile = matchMedia('(max-width: 640px)').matches || navigator.maxTouchPoints > 0;
-    const BEST_KEY = 'isMan20sBestV3';
-    let audioCtx = null;
-
-    function loadBest() {
-      try {
-        const raw = localStorage.getItem(BEST_KEY);
-        const val = raw == null ? 0 : Number(raw);
-        return Number.isFinite(val) ? Math.max(0, Math.min(20, val)) : 0;
-      } catch (_) {
-        return 0;
-      }
-    }
-
-    function saveBest(value) {
-      try { localStorage.setItem(BEST_KEY, String(value)); } catch (_) {}
-    }
-
-    function refreshBestText() {
-      bestText.textContent = `${GAME.best.toFixed(1)}s`;
-    }
-
-    function vibrate(pattern) {
-      // 真实设备边界：iOS Safari/多数桌面浏览器不支持；安卓 Chrome 常见可用，且通常需要用户手势后触发。
-      if (!('vibrate' in navigator)) return false;
-      try { return navigator.vibrate(pattern); } catch (_) { return false; }
-    }
-
-    function ensureAudio() {
-      const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) return null;
-      if (!audioCtx) audioCtx = new Audio();
-      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
-      return audioCtx;
-    }
-
-    function beep(freq = 440, duration = 0.08, type = 'sine', gainValue = 0.12, delay = 0) {
-      const ac = ensureAudio();
-      if (!ac) return;
-      const t = ac.currentTime + delay;
-      const osc = ac.createOscillator();
-      const gain = ac.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, t);
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(gainValue, t + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-      osc.connect(gain);
-      gain.connect(ac.destination);
-      osc.start(t);
-      osc.stop(t + duration + 0.025);
-    }
-
-    function feedback(kind) {
-      if (kind === 'start') {
-        vibrate([45, 25, 45]);
-        beep(440, 0.12, 'triangle', 0.13);
-        beep(720, 0.16, 'triangle', 0.16, 0.10);
-      } else if (kind === 'hit') {
-        vibrate([120, 60, 180]);
-        beep(155, 0.26, 'sawtooth', 0.18);
-        beep(78, 0.34, 'square', 0.11, 0.12);
-      } else if (kind === 'win') {
-        vibrate([55, 45, 55, 45, 110]);
-        beep(620, 0.13, 'triangle', 0.14);
-        beep(880, 0.15, 'triangle', 0.15, 0.12);
-        beep(1240, 0.22, 'triangle', 0.15, 0.26);
-      } else if (kind === 'record') {
-        vibrate([20, 25, 50]);
-        beep(980, 0.09, 'sine', 0.035);
-        beep(1320, 0.12, 'sine', 0.035, 0.09);
-      }
-    }
-
-    const GAME = {
-      width: canvas.width,
-      height: canvas.height,
-      targetSurvival: 20,
-      state: 'ready',
-      countdown: 3,
-      elapsed: 0,
-      level: 1,
-      spawnTimer: 0,
-      stars: [],
-      bullets: [],
-      keys: Object.create(null),
-      touch: { active: false, x: 0, y: 0, id: null, snap: false },
-      joy: { active: false, id: null, x: 0, y: 0, dx: 0, dy: 0 },
-      particles: [],
-      lastTime: 0,
-      uiLockUntil: 0,
-      best: 0,
-      player: { x: 0, y: 0, width: 32, height: 36, speed: 420, vx: 0, vy: 0, tilt: 0 }
-    };
-
-    function resetStars() {
-      const count = isMobile ? 48 : 80;
-      GAME.stars = Array.from({ length: count }, () => ({
-        x: Math.random() * GAME.width,
-        y: Math.random() * GAME.height,
-        r: Math.random() * (isMobile ? 1.3 : 1.8) + 0.3,
-        speed: Math.random() * (isMobile ? 12 : 18) + 8,
-        alpha: Math.random() * 0.7 + 0.2,
-        layer: Math.random(),
-      }));
-    }
-
-    function syncPlayerStart() {
-      GAME.player.x = GAME.width / 2 - GAME.player.width / 2;
-      GAME.player.y = GAME.height - (isMobile ? 104 : 90);
-    }
-
-    function resetGame() {
-      GAME.state = 'ready';
-      GAME.countdown = 3;
-      GAME.elapsed = 0;
-      GAME.level = 1;
-      GAME.spawnTimer = 0;
-      GAME.bullets = [];
-      GAME.touch.active = false;
-      GAME.touch.id = null;
-      GAME.touch.snap = false;
-      GAME.particles = [];
-      GAME.joy.active = false;
-      GAME.joy.id = null;
-      GAME.joy.dx = 0;
-      GAME.joy.dy = 0;
-      joystick.style.transform = 'translate(0px, 0px)';
-      syncPlayerStart();
-      timeText.textContent = '0.0s';
-      levelText.textContent = 'Lv.1';
-      refreshBestText();
-      showReadyOverlay();
-    }
-
-    function showReadyOverlay() {
-      overlay.innerHTML = `
-        <div class="dialog">
-          <h2>顶住 20 秒</h2>
-          <p>当前最佳：<strong class="ok">${GAME.best.toFixed(1)}s</strong></p>
-          <p>你驾驶一架小飞机，四面八方的子弹会随机飞来。</p>
-          <p><span class="desktop-only">使用 <strong>方向键</strong> 或 <strong>WASD</strong> 躲避弹幕。</span><span class="mobile-only">手机端用右下 <strong>右手飞行盘</strong> 指哪飞哪。</span><strong>撑满 20 秒即胜利</strong>。</p>
-          <div class="controls">
-            <span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>
-          </div>
-          <button id="startBtn">开启音效/触感并开始</button>
-          <div class="hint"><span class="desktop-only">也可直接按空格 / 回车开始；本地会自动保存最佳成绩</span><span class="mobile-only">首次点击会解锁浏览器音频；震动仅在支持 Vibration API 的安卓/部分浏览器生效</span></div>
-        </div>`;
-      document.getElementById('startBtn').onclick = startCountdown;
-    }
-
-    function showCountdownOverlay() {
-      overlay.innerHTML = `
-        <div class="dialog">
-          <h2>准备起飞</h2>
-          <p>倒计时 <span class="ok" style="font-weight:900;font-size:28px;">${Math.ceil(GAME.countdown)}</span></p>
-          <p>稳住，别撞。</p>
-        </div>`;
-    }
-
-    function showEndOverlay(win) {
-      GAME.uiLockUntil = performance.now() + 1800;
-      const prevBest = GAME.best;
-      const finalScore = Math.min(GAME.targetSurvival, Math.max(0, GAME.elapsed));
-      const isRecord = finalScore > prevBest + 0.049;
-      if (isRecord) {
-        GAME.best = finalScore;
-        saveBest(GAME.best);
-        refreshBestText();
-      }
-      feedback(win ? 'win' : 'hit');
-      if (isRecord) feedback('record');
-      const seconds = finalScore.toFixed(1);
-      overlay.innerHTML = `
-        <div class="dialog">
-          <h2 class="${win ? 'ok' : 'danger'}">${win ? '你真扛住了 20 秒！' : '被打中了，重开再来！'}</h2>
-          ${isRecord ? '<div class="record-burst">新纪录！</div>' : ''}
-          <p>${win ? '恭喜通关，这把你是真男人。' : '很遗憾，飞机已经被子弹命中。'}</p>
-          <p>本次存活：<strong>${seconds}s</strong> · 最佳：<strong class="ok">${GAME.best.toFixed(1)}s</strong></p>
-          <button id="restartBtn">再抗一把</button>
-          <div class="hint">最佳成绩保存在本机浏览器；请先看完结果，再点按钮重开，或按 R / 空格 / 回车</div>
-        </div>`;
-      document.getElementById('restartBtn').onclick = resetGameAndStart;
-    }
-
-    function startCountdown() {
-      if (GAME.state !== 'ready') return;
-      ensureAudio();
-      feedback('start');
-      GAME.state = 'countdown';
-      GAME.countdown = 3;
-      showCountdownOverlay();
-    }
-
-    function resetGameAndStart() {
-      resetGame();
-      startCountdown();
-    }
-
-    function startPlaying() {
-      GAME.state = 'playing';
-      GAME.elapsed = 0;
-      GAME.spawnTimer = 0;
-      GAME.bullets = [];
-      overlay.innerHTML = '';
-    }
-
-    function updateStars(dt) {
-      for (const s of GAME.stars) {
-        s.y += s.speed * dt;
-        if (s.y > GAME.height) {
-          s.y = -2;
-          s.x = Math.random() * GAME.width;
-        }
-      }
-    }
-
-    function getMoveAxis() {
-      const up = GAME.keys['arrowup'] || GAME.keys['w'];
-      const down = GAME.keys['arrowdown'] || GAME.keys['s'];
-      const left = GAME.keys['arrowleft'] || GAME.keys['a'];
-      const right = GAME.keys['arrowright'] || GAME.keys['d'];
-      let dx = 0;
-      let dy = 0;
-      if (up) dy -= 1;
-      if (down) dy += 1;
-      if (left) dx -= 1;
-      if (right) dx += 1;
-      if (dx !== 0 && dy !== 0) {
-        const n = Math.sqrt(2);
-        dx /= n;
-        dy /= n;
-      }
-      return { dx, dy };
-    }
-
-    function updatePlayer(dt) {
-      const prevX = GAME.player.x;
-      const prevY = GAME.player.y;
-      if (GAME.touch.active) {
-        const targetX = GAME.touch.x - GAME.player.width / 2;
-        const targetY = GAME.touch.y - GAME.player.height / 2;
-        const dx = targetX - GAME.player.x;
-        const dy = targetY - GAME.player.y;
-        const dist = Math.hypot(dx, dy);
-        // 指哪飞哪：首帧直接贴近，之后用高响应插值 + 大步长，避免“慢半拍”。
-        const follow = GAME.touch.snap ? 1 : Math.min(1, dt * (isMobile ? 42 : 34));
-        const maxStep = (isMobile ? 1400 : 1100) * dt;
-        if (GAME.touch.snap || dist <= maxStep || dist < 1) {
-          GAME.player.x = targetX;
-          GAME.player.y = targetY;
-          GAME.touch.snap = false;
-        } else {
-          GAME.player.x += Math.max(-maxStep, Math.min(maxStep, dx * follow));
-          GAME.player.y += Math.max(-maxStep, Math.min(maxStep, dy * follow));
-        }
-      } else {
-        const { dx, dy } = getMoveAxis();
-        GAME.player.x += dx * GAME.player.speed * dt;
-        GAME.player.y += dy * GAME.player.speed * dt;
-      }
-      GAME.player.x = Math.max(0, Math.min(GAME.width - GAME.player.width, GAME.player.x));
-      GAME.player.y = Math.max(0, Math.min(GAME.height - GAME.player.height, GAME.player.y));
-      GAME.player.vx = (GAME.player.x - prevX) / Math.max(dt, 0.001);
-      GAME.player.vy = (GAME.player.y - prevY) / Math.max(dt, 0.001);
-      const targetTilt = Math.max(-0.52, Math.min(0.52, GAME.player.vx / 760));
-      GAME.player.tilt += (targetTilt - GAME.player.tilt) * Math.min(1, dt * 12);
-    }
-
-    function levelFromTime(t) { return Math.min(10, 1 + Math.floor(t / 2.4)); }
-
-    function spawnConfigByTime(t) {
-      const mobileEase = isMobile ? 0.88 : 1;
-      const interval = Math.max(isMobile ? 0.2 : 0.14, (0.72 - t * 0.021) / mobileEase);
-      const count = Math.min(isMobile ? 4 : 6, 1 + Math.floor(t / (isMobile ? 4.8 : 4)));
-      const speedMin = (isMobile ? 128 : 140) + t * (isMobile ? 6.5 : 8);
-      const speedMax = (isMobile ? 198 : 220) + t * (isMobile ? 11 : 14);
-      return { interval, count, speedMin, speedMax };
-    }
-
-    function randomEdgeSpawn() {
-      const side = Math.floor(Math.random() * 4);
-      if (side === 0) return { x: Math.random() * GAME.width, y: -16 };
-      if (side === 1) return { x: GAME.width + 16, y: Math.random() * GAME.height };
-      if (side === 2) return { x: Math.random() * GAME.width, y: GAME.height + 16 };
-      return { x: -16, y: Math.random() * GAME.height };
-    }
-
-    function spawnBullets() {
-      const cfg = spawnConfigByTime(GAME.elapsed);
-      while (GAME.spawnTimer >= cfg.interval) {
-        GAME.spawnTimer -= cfg.interval;
-        for (let i = 0; i < cfg.count; i++) {
-          const pos = randomEdgeSpawn();
-          const px = GAME.player.x + GAME.player.width / 2;
-          const py = GAME.player.y + GAME.player.height / 2;
-          const angleBase = Math.atan2(py - pos.y, px - pos.x);
-          const angle = angleBase + (Math.random() - 0.5) * 0.55;
-          const speed = cfg.speedMin + Math.random() * (cfg.speedMax - cfg.speedMin);
-          GAME.bullets.push({
-            x: pos.x,
-            y: pos.y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            r: isMobile ? 4.2 + Math.random() * 2.2 : 5 + Math.random() * 3,
-            hue: Math.random() > 0.82 ? 42 : 5,
-            depth: 0.65 + Math.random() * 0.7,
-            spin: Math.random() * Math.PI
-          });
-        }
-      }
-    }
-
-    function updateBullets(dt) {
-      for (const b of GAME.bullets) {
-        b.x += b.vx * dt;
-        b.y += b.vy * dt;
-        b.spin += dt * 8;
-      }
-      GAME.bullets = GAME.bullets.filter(b => b.x > -40 && b.x < GAME.width + 40 && b.y > -40 && b.y < GAME.height + 40);
-    }
-
-    function updateParticles(dt) {
-      const px = GAME.player.x + GAME.player.width / 2;
-      const py = GAME.player.y + GAME.player.height * 0.83;
-      if (GAME.state === 'playing' || GAME.state === 'countdown') {
-        GAME.particles.push({ x: px + (Math.random() - 0.5) * 8, y: py, vx: -GAME.player.vx * 0.025 + (Math.random() - 0.5) * 16, vy: 70 + Math.random() * 55, life: 0.34, max: 0.34, r: 2 + Math.random() * 2.4 });
-      }
-      for (const p of GAME.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }
-      GAME.particles = GAME.particles.filter(p => p.life > 0);
-    }
-
-    function circleRectHit(cx, cy, r, rx, ry, rw, rh) {
-      const nearestX = Math.max(rx, Math.min(cx, rx + rw));
-      const nearestY = Math.max(ry, Math.min(cy, ry + rh));
-      const dx = cx - nearestX;
-      const dy = cy - nearestY;
-      return dx * dx + dy * dy <= r * r;
-    }
-
-    function checkCollision() {
-      for (const b of GAME.bullets) {
-        if (circleRectHit(b.x, b.y, b.r, GAME.player.x, GAME.player.y, GAME.player.width, GAME.player.height)) {
-          GAME.state = 'gameover';
-          showEndOverlay(false);
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function checkWin() {
-      if (GAME.elapsed >= GAME.targetSurvival) {
-        GAME.elapsed = GAME.targetSurvival;
-        GAME.state = 'win';
-        showEndOverlay(true);
-        return true;
-      }
-      return false;
-    }
-
-    function drawBackground() {
-      ctx.clearRect(0, 0, GAME.width, GAME.height);
-      const g = ctx.createLinearGradient(0, 0, 0, GAME.height);
-      g.addColorStop(0, '#10264a');
-      g.addColorStop(0.48, '#07182b');
-      g.addColorStop(1, '#030811');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, GAME.width, GAME.height);
-
-      const cx = GAME.width / 2;
-      const horizon = GAME.height * 0.22;
-      ctx.save();
-      ctx.globalAlpha = 0.18;
-      const glow = ctx.createRadialGradient(cx, horizon, 10, cx, horizon, GAME.width * 0.75);
-      glow.addColorStop(0, 'rgba(77,212,255,.38)');
-      glow.addColorStop(1, 'rgba(77,212,255,0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, GAME.width, GAME.height);
-      ctx.restore();
-
-      for (const s of GAME.stars) {
-        const depth = 0.55 + s.layer * 1.5;
-        ctx.globalAlpha = s.alpha * (0.55 + s.layer * 0.6);
-        ctx.fillStyle = s.layer > 0.72 ? '#ffffff' : '#9edcff';
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r * depth, 0, Math.PI * 2);
-        ctx.fill();
-        if (s.layer > 0.62) {
-          ctx.globalAlpha *= 0.35;
-          ctx.fillRect(s.x - 0.5, s.y - s.speed * 0.018, 1, s.speed * 0.06);
-        }
-      }
-      ctx.globalAlpha = 1;
-
-      // 伪透视跑道网格：线条向地平线收束，增强纵深和速度感。
-      ctx.strokeStyle = `rgba(120,210,255,${isMobile ? 0.11 : 0.14})`;
-      ctx.lineWidth = 1;
-      for (let i = -9; i <= 9; i++) {
-        const bottomX = cx + i * (GAME.width / 12);
-        ctx.beginPath();
-        ctx.moveTo(cx + i * 8, horizon);
-        ctx.lineTo(bottomX, GAME.height);
-        ctx.stroke();
-      }
-      for (let k = 0; k < 12; k++) {
-        const t = k / 11;
-        const y = horizon + Math.pow(t, 1.85) * (GAME.height - horizon);
-        const half = 20 + Math.pow(t, 1.55) * GAME.width * 0.62;
-        ctx.globalAlpha = 0.18 + t * 0.22;
-        ctx.beginPath();
-        ctx.moveTo(cx - half, y);
-        ctx.lineTo(cx + half, y);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawParticles() {
-      for (const p of GAME.particles) {
-        const a = Math.max(0, p.life / p.max);
-        ctx.globalAlpha = a * 0.75;
-        ctx.fillStyle = a > 0.55 ? '#7df0ff' : '#ff9d3d';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * (1.2 - a * 0.35), 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawPlayer() {
-      const { x, y, width, height } = GAME.player;
-      ctx.save();
-      ctx.translate(x + width / 2, y + height / 2);
-      ctx.rotate(GAME.player.tilt);
-      ctx.transform(1, 0.05 * Math.sin(GAME.player.tilt), 0, 1, 0, 0);
-      ctx.shadowBlur = isMobile ? 14 : 22;
-      ctx.shadowColor = 'rgba(77,212,255,.62)';
-      const body = ctx.createLinearGradient(0, -height / 2, 0, height / 2);
-      body.addColorStop(0, '#e9fcff');
-      body.addColorStop(0.36, '#59d8ff');
-      body.addColorStop(1, '#126cff');
-      ctx.fillStyle = body;
-      ctx.beginPath();
-      ctx.moveTo(0, -height / 2 - 3);
-      ctx.lineTo(width / 2 + 4, height / 2 - 1);
-      ctx.lineTo(0, height / 4);
-      ctx.lineTo(-width / 2 - 4, height / 2 - 1);
-      ctx.closePath();
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = 'rgba(255,255,255,.45)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(240,252,255,.95)';
-      ctx.beginPath();
-      ctx.ellipse(0, -6, 5.5, 7.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffb347';
-      ctx.beginPath();
-      ctx.moveTo(-5, height / 2 - 1);
-      ctx.lineTo(0, height / 2 + 14 + Math.random() * 5);
-      ctx.lineTo(5, height / 2 - 1);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawBullets() {
-      for (const b of GAME.bullets) {
-        const color = b.hue === 42 ? '#ffcb52' : '#ff5a5a';
-        const rr = b.r * b.depth;
-        ctx.save();
-        ctx.translate(b.x, b.y);
-        ctx.rotate(Math.atan2(b.vy, b.vx));
-        ctx.shadowBlur = isMobile ? 9 : 16;
-        ctx.shadowColor = color;
-        const trail = ctx.createLinearGradient(-rr * 4.8, 0, rr, 0);
-        trail.addColorStop(0, 'rgba(255,90,90,0)');
-        trail.addColorStop(1, color);
-        ctx.fillStyle = trail;
-        ctx.beginPath();
-        ctx.ellipse(-rr * 1.8, 0, rr * 3.2, rr * 0.62, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(0, 0, rr, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,.55)';
-        ctx.beginPath();
-        ctx.arc(rr * -0.22, -rr * 0.28, rr * 0.32, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-      ctx.shadowBlur = 0;
-    }
-
-    function drawCountdownVisual() {
-      if (GAME.state !== 'countdown') return;
-      ctx.save();
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
-      ctx.beginPath();
-      ctx.arc(GAME.width / 2, GAME.height / 2, 88, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function render() { drawBackground(); drawParticles(); drawBullets(); drawPlayer(); drawCountdownVisual(); }
-
-    function updateHUD() {
-      timeText.textContent = `${GAME.elapsed.toFixed(1)}s`;
-      GAME.level = levelFromTime(GAME.elapsed);
-      levelText.textContent = `Lv.${GAME.level}`;
-      if (GAME.state === 'countdown') showCountdownOverlay();
-    }
-
-    function loop(timestamp) {
-      if (!GAME.lastTime) GAME.lastTime = timestamp;
-      const dt = Math.min(0.033, (timestamp - GAME.lastTime) / 1000);
-      GAME.lastTime = timestamp;
-      updateStars(dt);
-      updateParticles(dt);
-      if (GAME.state === 'countdown') {
-        GAME.countdown -= dt;
-        if (GAME.countdown <= 0) startPlaying();
-      } else if (GAME.state === 'playing') {
-        GAME.elapsed += dt;
-        GAME.spawnTimer += dt;
-        updatePlayer(dt);
-        spawnBullets();
-        updateBullets(dt);
-        if (!checkCollision()) checkWin();
-      }
-      updateHUD();
-      render();
-      requestAnimationFrame(loop);
-    }
-
-    function pointerToGame(e) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = GAME.width / rect.width;
-      const scaleY = GAME.height / rect.height;
-      return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
-    }
-
-    function setTouchTarget(e) {
-      const p = pointerToGame(e);
-      GAME.touch.x = Math.max(0, Math.min(GAME.width, p.x));
-      GAME.touch.y = Math.max(0, Math.min(GAME.height, p.y));
-    }
-
-    function setTouchTargetFromPad(clientX, clientY, snap = false) {
-      const rect = joybox.getBoundingClientRect();
-      const localX = Math.max(0, Math.min(rect.width, clientX - rect.left));
-      const localY = Math.max(0, Math.min(rect.height, clientY - rect.top));
-      const nx = localX / rect.width;
-      const ny = localY / rect.height;
-      // 右手飞行盘不是慢速摇杆，而是全屏位置映射：拇指在盘内的位置 = 飞机在战场对应位置。
-      GAME.touch.x = nx * GAME.width;
-      GAME.touch.y = ny * GAME.height;
-      GAME.touch.snap = snap;
-      const visualX = localX - rect.width / 2;
-      const visualY = localY - rect.height / 2;
-      joystick.style.transform = `translate(${visualX}px, ${visualY}px)`;
-    }
-
-    canvas.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      canvas.setPointerCapture?.(e.pointerId);
-      if (GAME.state === 'ready') {
-        resetGameAndStart();
-        return;
-      }
-      if (GAME.state === 'gameover' || GAME.state === 'win') return;
-      if (GAME.state === 'playing' || GAME.state === 'countdown') {
-        GAME.touch.active = true;
-        GAME.touch.id = e.pointerId;
-        GAME.touch.snap = true;
-        setTouchTarget(e);
-      }
-    }, { passive: false });
-
-    canvas.addEventListener('pointermove', (e) => {
-      if (!GAME.touch.active || GAME.touch.id !== e.pointerId) return;
-      e.preventDefault();
-      GAME.touch.snap = false;
-      setTouchTarget(e);
-    }, { passive: false });
-
-    function endPointer(e) {
-      if (GAME.touch.id === e.pointerId) {
-        GAME.touch.active = false;
-        GAME.touch.id = null;
-        GAME.touch.snap = false;
-      }
-    }
-
-    canvas.addEventListener('pointerup', endPointer);
-    canvas.addEventListener('pointercancel', endPointer);
-
-    joybox.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      joybox.setPointerCapture?.(e.pointerId);
-      ensureAudio();
-      if (GAME.state === 'ready') startCountdown();
-      if (GAME.state === 'gameover' || GAME.state === 'win') return;
-      GAME.joy.active = true;
-      GAME.joy.id = e.pointerId;
-      GAME.touch.active = true;
-      GAME.touch.id = e.pointerId;
-      setTouchTargetFromPad(e.clientX, e.clientY, true);
-    }, { passive: false });
-    joybox.addEventListener('pointermove', (e) => {
-      if (!GAME.joy.active || GAME.joy.id !== e.pointerId) return;
-      e.preventDefault();
-      setTouchTargetFromPad(e.clientX, e.clientY, false);
-    }, { passive: false });
-    function releaseJoystick(e) {
-      if (GAME.joy.id !== e.pointerId) return;
-      GAME.joy.active = false;
-      GAME.joy.id = null;
-      GAME.joy.dx = 0;
-      GAME.joy.dy = 0;
-      if (GAME.touch.id === e.pointerId) {
-        GAME.touch.active = false;
-        GAME.touch.id = null;
-        GAME.touch.snap = false;
-      }
-      joystick.style.transform = 'translate(0px, 0px)';
-    }
-    joybox.addEventListener('pointerup', releaseJoystick);
-    joybox.addEventListener('pointercancel', releaseJoystick);
-
-    window.addEventListener('keydown', (e) => {
-      const key = e.key.toLowerCase();
-      GAME.keys[key] = true;
-      if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(key)) e.preventDefault();
-      if ((GAME.state === 'ready' || GAME.state === 'gameover' || GAME.state === 'win') && (key === ' ' || key === 'enter')) {
-        if (performance.now() >= GAME.uiLockUntil) resetGameAndStart();
-      }
-      if (GAME.state === 'ready' && (key === ' ' || key === 'enter')) startCountdown();
-      if ((GAME.state === 'gameover' || GAME.state === 'win') && key === 'r' && performance.now() >= GAME.uiLockUntil) resetGameAndStart();
-    });
-    window.addEventListener('keyup', (e) => { GAME.keys[e.key.toLowerCase()] = false; });
-
-    window.GAME = GAME;
-    window.resetGame = resetGame;
-    window.refreshBestText = refreshBestText;
-    window.showEndOverlay = showEndOverlay;
-
-    GAME.best = loadBest();
-    resetStars();
-    resetGame();
-    requestAnimationFrame(loop);
-  </script>
+<script>
+const canvas=document.getElementById('game');const ctx=canvas.getContext('2d');const overlay=document.getElementById('overlay');const timeText=document.getElementById('timeText');const targetText=document.getElementById('targetText');const scoreText=document.getElementById('scoreText');const stageText=document.getElementById('stageText');const modeText=document.getElementById('modeText');const touchIndicator=document.getElementById('touchIndicator');const isMobile=matchMedia('(max-width: 640px)').matches||navigator.maxTouchPoints>0;const STORAGE_KEY='isMan20sProgressV4';let audioCtx=null;
+const CAMPAIGN=[{name:'第1关',target:20,profile:'warmup'},{name:'第2关',target:25,profile:'pressure'},{name:'第3关',target:30,profile:'panic'}];const ENDLESS_TARGET=9999;
+function loadProgress(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return{campaignBest:0,endlessBest:0,lastMode:'campaign',lastStage:0};const v=JSON.parse(raw);return{campaignBest:+v.campaignBest||0,endlessBest:+v.endlessBest||0,lastMode:v.lastMode==='endless'?'endless':'campaign',lastStage:+v.lastStage||0};}catch(_){return{campaignBest:0,endlessBest:0,lastMode:'campaign',lastStage:0}}}
+function saveProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(PROGRESS));}catch(_){} }
+const PROGRESS=loadProgress();
+function ensureAudio(){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;if(!audioCtx)audioCtx=new A();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});return audioCtx}
+function beep(freq,duration=0.08,type='sine',gainValue=0.045,delay=0){const ac=ensureAudio();if(!ac)return;const t=ac.currentTime+delay;const osc=ac.createOscillator();const gain=ac.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,t);gain.gain.setValueAtTime(0.0001,t);gain.gain.exponentialRampToValueAtTime(gainValue,t+0.012);gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);osc.connect(gain);gain.connect(ac.destination);osc.start(t);osc.stop(t+duration+0.025)}
+function shareText(mode,rating,elapsed,score,graze,combo){const title=mode==='campaign'&&elapsed>=20?'大哥真男人':'再来一把';return `${title}｜${elapsed.toFixed(1)}秒｜${rating}｜分数${score}｜擦弹${graze}｜连击${combo}`}
+function vibrate(p){if('vibrate'in navigator)try{navigator.vibrate(p)}catch(_){} }
+function sfx(kind){if(kind==='start'){vibrate(18);beep(520,0.07,'triangle');beep(760,0.08,'triangle',0.04,0.08)}else if(kind==='hit'){vibrate([55,25,85]);beep(180,0.16,'sawtooth',0.055);beep(90,0.2,'square',0.04,0.11)}else if(kind==='win'){vibrate([24,24,24]);beep(660,0.08,'triangle');beep(880,0.08,'triangle',0.045,0.09);beep(1180,0.14,'triangle',0.045,0.18)}else if(kind==='graze'){beep(980,0.03,'sine',0.015)}else if(kind==='wave'){beep(240,0.05,'square',0.018)}else if(kind==='record'){vibrate([18,20,45]);beep(1040,0.08,'sine',0.035);beep(1380,0.12,'sine',0.035,0.08)}}
+const GAME={width:canvas.width,height:canvas.height,state:'ready',mode:'campaign',stageIndex:0,targetSurvival:20,countdown:3,elapsed:0,spawnTimer:0,waveTimer:0,nextWaveIn:0,waveStage:'warmup',wavePreview:0,waveType:'',lastWaveAt:0,stars:[],bullets:[],warnings:[],effects:[],keys:Object.create(null),touch:{active:false,id:null,x:0,y:0},lastTouchPos:{x:0,y:0},bestCampaign:PROGRESS.campaignBest||0,bestEndless:PROGRESS.endlessBest||0,score:0,graze:0,combo:0,comboTimer:0,player:{x:0,y:0,width:32,height:36,speed:300},uiLockUntil:0,clearBanner:'',pendingNext:false};
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function resetStars(){const count=isMobile?56:88;GAME.stars=Array.from({length:count},()=>({x:Math.random()*GAME.width,y:Math.random()*GAME.height,r:Math.random()*(isMobile?1.4:1.8)+0.25,speed:Math.random()*(isMobile?14:20)+8,alpha:Math.random()*0.7+0.18}))}
+function syncPlayerStart(){GAME.player.x=GAME.width/2-GAME.player.width/2;GAME.player.y=GAME.height-(isMobile?106:92)}
+function stageMeta(){return GAME.mode==='campaign'?CAMPAIGN[GAME.stageIndex]:{name:'无尽模式',target:ENDLESS_TARGET,profile:'endless'}}
+function currentTarget(){return GAME.mode==='campaign'?CAMPAIGN[GAME.stageIndex].target:ENDLESS_TARGET}
+function setMode(mode,stageIndex=0){GAME.mode=mode;GAME.stageIndex=stageIndex;const meta=stageMeta();GAME.targetSurvival=meta.target;targetText.textContent=meta.target===ENDLESS_TARGET?'∞':`${meta.target.toFixed(1)}s`;modeText.textContent=mode==='campaign'?'闯关':'无尽';stageText.textContent=mode==='campaign'?`${stageIndex+1} / ${CAMPAIGN.length}`:'冲分';PROGRESS.lastMode=mode;PROGRESS.lastStage=stageIndex;saveProgress()}
+function resetRound(){GAME.state='ready';GAME.countdown=3;GAME.elapsed=0;GAME.spawnTimer=0;GAME.waveTimer=0;GAME.nextWaveIn=0;GAME.wavePreview=0;GAME.waveStage='warmup';GAME.waveType='';GAME.bullets=[];GAME.warnings=[];GAME.effects=[];GAME.score=0;GAME.graze=0;GAME.combo=0;GAME.comboTimer=0;GAME.pendingNext=false;GAME.clearBanner='';GAME.touch.active=false;GAME.touch.id=null;touchIndicator.classList.remove('active');syncPlayerStart();timeText.textContent='0.0s';scoreText.textContent='0';refreshHUD();showReadyOverlay()}
+function refreshHUD(){const meta=stageMeta();targetText.textContent=meta.target===ENDLESS_TARGET?'∞':`${meta.target.toFixed(1)}s`;stageText.textContent=GAME.mode==='campaign'?`${GAME.stageIndex+1} / ${CAMPAIGN.length}`:'冲分';modeText.textContent=GAME.mode==='campaign'?'闯关':'无尽'}
+function updateBestTexts(){PROGRESS.campaignBest=GAME.bestCampaign;PROGRESS.endlessBest=GAME.bestEndless;saveProgress()}
+function getRating(score,target,won){if(won)return score>=target*0.95?'S':score>=target*0.8?'A':'B';if(score>=target*0.85)return'A';if(score>=target*0.65)return'B';if(score>=target*0.4)return'C';return'D'}
+function describeFail(){const t=GAME.elapsed;if(t<4)return'前期先稳住，别急着穿过弹幕密区';if(t<10)return'中段的扇形波开始收口，记得提前侧移';if(t<15)return'后段压迫感上来了，别在屏幕中心停太久';return'最后几秒最容易贪，保持斜向走位更安全'}
+function showReadyOverlay(){const meta=stageMeta();const best=GAME.mode==='campaign'?GAME.bestCampaign:GAME.bestEndless;overlay.innerHTML=`<div class="dialog"><h2>${GAME.mode==='campaign'?'闯关模式':'无尽模式'}</h2><p>目标：${meta.target===ENDLESS_TARGET?'尽量活更久':'撑住当前关卡时长'}。通关后会继续解锁下一关，而不是只看最佳成绩。</p><p>当前最佳：<strong class="ok">${best.toFixed(1)}s</strong>${GAME.mode==='campaign'&&GAME.stageIndex<2?` · 下一关更凶：${CAMPAIGN[GAME.stageIndex+1].target.toFixed(1)}s`:' · 无尽模式适合刷极限生存'}</p><p>按住任意区域拖动移动；子弹来前会给短预警，擦弹还能加分和加 combo。</p><div class="status-line"><span class="pill"><strong>前松</strong> 易上手</span><span class="pill"><strong>中紧</strong> 波次压迫</span><span class="pill"><strong>后狠</strong> 连发逼位</span></div><button id="startBtn">开始${GAME.mode==='campaign'?'闯关':'冲分'}</button><div class="hint">${GAME.mode==='campaign'?'通关当前关卡后可直接进入下一关；按 Tab/按钮切换无尽模式。':'无尽模式用于冲最长生存与最高评分。'}<br><span class="desktop-only">空格/回车开始，Tab 切换模式，R 重开。</span><span class="mobile-only">轻推即可，手指不用常驻占位。</span></div></div>`;document.getElementById('startBtn').onclick=startCountdown}
+function showCountdownOverlay(){overlay.innerHTML=`<div class="dialog"><h2>准备起飞</h2><p>倒计时 <span class="ok" style="font-weight:900;font-size:28px;">${Math.ceil(GAME.countdown)}</span></p><p>前 6 秒是上手段，后面会逐步加压。</p></div>`}
+function showResultOverlay(win){GAME.uiLockUntil=performance.now()+1600;const score=GAME.score;const rating=getRating(GAME.elapsed,GAME.targetSurvival,win);const isRecord=GAME.mode==='campaign'?GAME.elapsed>GAME.bestCampaign+0.049:GAME.elapsed>GAME.bestEndless+0.049;if(GAME.mode==='campaign'){GAME.bestCampaign=Math.max(GAME.bestCampaign,GAME.elapsed)}else GAME.bestEndless=Math.max(GAME.bestEndless,GAME.elapsed);if(isRecord){updateBestTexts();sfx('record')}sfx(win?'win':'hit');const share=shareText(GAME.mode,rating,GAME.elapsed,score,GAME.graze,GAME.combo);const shareHtml=win&&GAME.mode==='campaign'&&GAME.elapsed>=20?`<div class="share-badge">可截图分享</div><div class="share-hero">大哥真男人</div><p class="share-sub">这张结算页就是给你发朋友圈/群聊用的：大字、成绩、称号、擦弹数据都在，直接截就行。</p><div class="share-grid"><div class="share-stat"><span class="k">生存时长</span><span class="v">${GAME.elapsed.toFixed(1)}s</span></div><div class="share-stat"><span class="k">评分</span><span class="v">${rating}</span></div><div class="share-stat"><span class="k">分数</span><span class="v">${score}</span></div><div class="share-stat"><span class="k">擦弹 / 连击</span><span class="v">${GAME.graze} / ${GAME.combo}</span></div></div><div class="share-quote">${share}</div><div class="share-actions"><button id="copyBtn">复制分享文案</button><button id="restartBtn">再来一把</button></div>`:'';const nextModeBtn=GAME.mode==='campaign'&&win&&GAME.stageIndex<CAMPAIGN.length-1?`<button id="nextBtn">挑战第 ${GAME.stageIndex+2} 关</button>`:'';const nextLoopBtn=GAME.mode==='campaign'&&win&&GAME.stageIndex===CAMPAIGN.length-1?`<button id="endlessBtn">进入无尽模式</button>`:'';const restartLabel=win?'再来一轮':'重新挑战';const reason=win?`你已经摸到关卡节奏了，下一把可以冲更高评分。`:`${describeFail()}。`;overlay.innerHTML=`<div class="dialog ${win&&GAME.mode==='campaign'&&GAME.elapsed>=20?'share-card':''}"><h2 class="${win?'ok':'danger'}">${win?'通关成功':'本次被击中'}</h2>${isRecord?'<div class="badge" style="display:inline-block;margin:0 0 8px;padding:6px 10px;border-radius:999px;background:rgba(102,227,154,.12);border-color:rgba(102,227,154,.3);color:var(--ok);font-weight:900;">新纪录</div>':''}${shareHtml}<p>本次生存：<strong>${GAME.elapsed.toFixed(1)}s</strong> · 评分：<strong class="ok">${rating}</strong> · 分数：<strong class="ok">${score}</strong></p><p>${reason}</p><p>${win?'继续往下一关，压迫感会明显增加；':'重开前先看清预警和弹道节奏。'}${GAME.mode==='campaign'?` 当前关卡最佳：<strong class="ok">${GAME.bestCampaign.toFixed(1)}s</strong>`:` 无尽最佳：<strong class="ok">${GAME.bestEndless.toFixed(1)}s</strong>`}</p><div class="controls">${GAME.mode==='campaign'&&win&&GAME.stageIndex<CAMPAIGN.length-1?'<span class="key">下一关</span>':'<span class="key">重开</span>'}<span class="key">Tab</span><span class="key">R</span><span class="key">空格</span></div>${win&&GAME.mode==='campaign'&&GAME.elapsed>=20?'':`<button id="restartBtn">${restartLabel}</button>`}${nextModeBtn}${nextLoopBtn}<div class="hint">${GAME.mode==='campaign'&&win&&GAME.stageIndex<CAMPAIGN.length-1?'通关后立刻接更凶的下一关，别让手感断掉。':'无尽模式可专门冲极限分与极限生存。'}<br>R / 空格 / 回车 也能继续。</div></div>`;const restartBtn=document.getElementById('restartBtn');if(restartBtn)restartBtn.onclick=resetRoundAndStart;const copyBtn=document.getElementById('copyBtn');if(copyBtn)copyBtn.onclick=async()=>{try{await navigator.clipboard.writeText(share)}catch(_){const t=document.createElement('textarea');t.value=share;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}};if(document.getElementById('nextBtn'))document.getElementById('nextBtn').onclick=()=>{setMode('campaign',Math.min(GAME.stageIndex+1,CAMPAIGN.length-1));resetRoundAndStart()};if(document.getElementById('endlessBtn'))document.getElementById('endlessBtn').onclick=()=>{setMode('endless',0);resetRoundAndStart()}}
+function startCountdown(){if(GAME.state!=='ready')return;sfx('start');GAME.state='countdown';GAME.countdown=3;showCountdownOverlay()}
+function resetRoundAndStart(){resetRound();startCountdown()}
+function startPlaying(){GAME.state='playing';GAME.elapsed=0;GAME.spawnTimer=0;GAME.waveTimer=0;GAME.wavePreview=0;GAME.bullets=[];GAME.warnings=[];GAME.effects=[];overlay.innerHTML='';if(GAME.mode==='campaign'){const meta=CAMPAIGN[GAME.stageIndex];GAME.targetSurvival=meta.target;targetText.textContent=meta.target.toFixed(1)+'s'}else{GAME.targetSurvival=ENDLESS_TARGET;targetText.textContent='∞'}}
+function updateStars(dt){for(const s of GAME.stars){s.y+=s.speed*dt;if(s.y>GAME.height){s.y=-2;s.x=Math.random()*GAME.width}}}
+function getMoveAxis(){const up=GAME.keys['arrowup']||GAME.keys['w'];const down=GAME.keys['arrowdown']||GAME.keys['s'];const left=GAME.keys['arrowleft']||GAME.keys['a'];const right=GAME.keys['arrowright']||GAME.keys['d'];let dx=0,dy=0;if(up)dy-=1;if(down)dy+=1;if(left)dx-=1;if(right)dx+=1;if(dx&&dy){const n=Math.SQRT2;dx/=n;dy/=n}return{dx,dy}}
+function updatePlayer(dt){if(GAME.touch.active){const tx=GAME.touch.x-GAME.player.width/2,ty=GAME.touch.y-GAME.player.height/2,dx=tx-GAME.player.x,dy=ty-GAME.player.y,dist=Math.hypot(dx,dy),maxStep=GAME.player.speed*1.22*dt;if(dist<=maxStep||dist<1){GAME.player.x=tx;GAME.player.y=ty}else{GAME.player.x+=dx/dist*maxStep;GAME.player.y+=dy/dist*maxStep}}else{const a=getMoveAxis();GAME.player.x+=a.dx*GAME.player.speed*dt;GAME.player.y+=a.dy*GAME.player.speed*dt}GAME.player.x=clamp(GAME.player.x,0,GAME.width-GAME.player.width);GAME.player.y=clamp(GAME.player.y,0,GAME.height-GAME.player.height)}
+function stagePhase(t){const meta=stageMeta();if(GAME.mode==='campaign'){if(t<meta.target*0.34)return'warmup';if(t<meta.target*0.72)return'pressure';return'panic'}return t<10?'warmup':t<22?'pressure':'panic'}
+function spawnConfig(t){const phase=stagePhase(t);const stageBoost=GAME.mode==='campaign'?GAME.stageIndex*0.12:0.34+Math.min(0.55,t/36);const base=phase==='warmup'?1.24:phase==='pressure'?0.72:0.48;const interval=Math.max(isMobile?0.22:0.15,base-stageBoost*0.28-Math.min(t*0.008,0.18));const count=phase==='warmup'?1:phase==='pressure'?2:GAME.mode==='campaign'&&GAME.stageIndex===2?3:2;const speedMin=(isMobile?106:118)+(phase==='warmup'?t*3.0:t*7)+stageBoost*56;const speedMax=(isMobile?156:190)+(phase==='warmup'?t*5.4:t*11)+stageBoost*72;const warningLead=phase==='warmup'?0.72:phase==='pressure'?0.4:0.28;return{phase,interval,count,speedMin,speedMax,warningLead}}
+function randomEdgeSpawn(){const side=Math.floor(Math.random()*4);if(side===0)return{x:Math.random()*GAME.width,y:-18,side};if(side===1)return{x:GAME.width+18,y:Math.random()*GAME.height,side};if(side===2)return{x:Math.random()*GAME.width,y:GAME.height+18,side};return{x:-18,y:Math.random()*GAME.height,side}}
+function addWarning(pos,eta,kind){GAME.warnings.push({x:pos.x,y:pos.y,ttl:eta,kind,phase:'incoming'})}
+function spawnBullets(){const cfg=spawnConfig(GAME.elapsed);while(GAME.spawnTimer>=cfg.interval){GAME.spawnTimer-=cfg.interval;for(let i=0;i<cfg.count;i++){const pos=randomEdgeSpawn();const px=GAME.player.x+GAME.player.width/2,py=GAME.player.y+GAME.player.height/2;const base=Math.atan2(py-pos.y,px-pos.x);const spread=cfg.phase==='panic'?0.82:0.56;const angle=base+(Math.random()-0.5)*spread;const speed=cfg.speedMin+Math.random()*(cfg.speedMax-cfg.speedMin);const r=(isMobile?4.2:5)+Math.random()*(isMobile?2.2:2.8);const warnSpeed=Math.max(120,speed);const distance=Math.hypot(px-pos.x,py-pos.y);const eta=distance/warnSpeed;addWarning(pos,Math.max(cfg.warningLead,Math.min(0.85,eta*0.55)),cfg.phase);GAME.bullets.push({x:pos.x,y:pos.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r,hue:Math.random()>0.82?42:5,spawnedAt:GAME.elapsed,graze:false,warned:true})}if(Math.random()<0.12&&GAME.mode==='campaign')GAME.wavePreview=0.4;sfx('wave')}}
+function updateBullets(dt){const px=GAME.player.x+GAME.player.width/2,py=GAME.player.y+GAME.player.height/2;for(const b of GAME.bullets){b.x+=b.vx*dt;b.y+=b.vy*dt;const d=Math.hypot((b.x-px),(b.y-py));if(!b.graze&&d<b.r+20&&d>b.r+4){b.graze=true;GAME.graze+=1;GAME.combo+=1;GAME.comboTimer=1.2;GAME.score+=10+GAME.combo*2;GAME.effects.push({x:px,y:py,ttl:0.5,text:`擦弹 +${10+GAME.combo*2}`,color:'var(--ok)'}) ;sfx('graze')}}GAME.bullets=GAME.bullets.filter(b=>b.x>-60&&b.x<GAME.width+60&&b.y>-60&&b.y<GAME.height+60)}
+function circleRectHit(cx,cy,r,rx,ry,rw,rh){const nx=Math.max(rx,Math.min(cx,rx+rw)),ny=Math.max(ry,Math.min(cy,ry+rh)),dx=cx-nx,dy=cy-ny;return dx*dx+dy*dy<=r*r}
+function checkCollision(){for(const b of GAME.bullets){if(circleRectHit(b.x,b.y,b.r,GAME.player.x,GAME.player.y,GAME.player.width,GAME.player.height)){GAME.state='gameover';showResultOverlay(false);return true}}return false}
+function checkWin(){if(GAME.elapsed>=GAME.targetSurvival){GAME.elapsed=GAME.targetSurvival;GAME.state='win';showResultOverlay(true);return true}return false}
+function updateWarnings(dt){const px=GAME.player.x+GAME.player.width/2,py=GAME.player.y+GAME.player.height/2;for(const w of GAME.warnings){w.ttl-=dt;if(w.ttl<0)w.ttl=0}GAME.warnings=GAME.warnings.filter(w=>w.ttl>0.02&&w.phase!=='gone');if(GAME.comboTimer>0){GAME.comboTimer-=dt;if(GAME.comboTimer<=0)GAME.combo=0}for(const e of GAME.effects)e.ttl-=dt;GAME.effects=GAME.effects.filter(e=>e.ttl>0)}
+function drawBackground(){ctx.clearRect(0,0,GAME.width,GAME.height);const g=ctx.createLinearGradient(0,0,0,GAME.height);g.addColorStop(0,'#0a1930');g.addColorStop(1,'#040a14');ctx.fillStyle=g;ctx.fillRect(0,0,GAME.width,GAME.height);const gridStep=isMobile?56:40;for(const s of GAME.stars){ctx.globalAlpha=s.alpha;ctx.fillStyle='#c7e8ff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;ctx.strokeStyle=`rgba(120,170,220,${isMobile?0.05:0.08})`;ctx.lineWidth=1;for(let x=0;x<GAME.width;x+=gridStep){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,GAME.height);ctx.stroke()}for(let y=0;y<GAME.height;y+=gridStep){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(GAME.width,y);ctx.stroke()}}
+function drawWarnings(){for(const w of GAME.warnings){const alpha=Math.max(0.1,Math.min(0.8,w.ttl));ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=w.ttl<0.3?'rgba(255,106,106,.95)':'rgba(255,191,71,.85)';ctx.fillStyle=w.ttl<0.3?'rgba(255,106,106,.12)':'rgba(255,191,71,.10)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(w.x,w.y,18+Math.sin((1-w.ttl)*10)*2,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore()}}
+function drawBullets(){for(const b of GAME.bullets){const color=b.hue===42?'#ffcb52':'#ff5a5a';ctx.shadowBlur=isMobile?6:12;ctx.shadowColor=color;ctx.fillStyle=color;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill()}ctx.shadowBlur=0}
+function drawPlayer(){const {x,y,width,height}=GAME.player;ctx.save();ctx.translate(x+width/2,y+height/2);ctx.shadowBlur=isMobile?10:18;ctx.shadowColor='rgba(87,217,255,.45)';ctx.fillStyle='#59d8ff';ctx.beginPath();ctx.moveTo(0,-height/2);ctx.lineTo(width/2,height/2);ctx.lineTo(0,height/4);ctx.lineTo(-width/2,height/2);ctx.closePath();ctx.fill();ctx.fillStyle='#e9fcff';ctx.beginPath();ctx.arc(0,-4,4.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1ba8ff';ctx.fillRect(-3,height/4,6,10);ctx.restore()}
+function drawEffects(){ctx.save();ctx.font=`${isMobile?12:14}px -apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,sans-serif`;ctx.textAlign='center';for(const e of GAME.effects){ctx.globalAlpha=Math.max(0,e.ttl/0.5);ctx.fillStyle='rgba(102,227,154,.95)';ctx.fillText(e.text,e.x,e.y-24*(1-e.ttl/0.5))}ctx.restore()}
+function drawCenterPulse(){if(GAME.state!=='countdown')return;ctx.save();ctx.fillStyle='rgba(255,255,255,0.05)';ctx.beginPath();ctx.arc(GAME.width/2,GAME.height/2,88,0,Math.PI*2);ctx.fill();ctx.restore()}
+function render(){drawBackground();drawWarnings();drawBullets();drawPlayer();drawEffects();drawCenterPulse()}
+function updateHUD(){timeText.textContent=`${GAME.elapsed.toFixed(1)}s`;scoreText.textContent=String(GAME.score);refreshHUD();if(GAME.state==='countdown')showCountdownOverlay()}
+function loop(ts){if(!GAME.lastTime)GAME.lastTime=ts;const dt=Math.min(0.033,(ts-GAME.lastTime)/1000);GAME.lastTime=ts;updateStars(dt);if(GAME.state==='countdown'){GAME.countdown-=dt;if(GAME.countdown<=0)startPlaying()}else if(GAME.state==='playing'){GAME.elapsed+=dt;GAME.spawnTimer+=dt;GAME.waveTimer+=dt;GAME.score+=Math.floor(dt*2);updatePlayer(dt);spawnBullets();updateBullets(dt);updateWarnings(dt);if(!checkCollision())checkWin()}updateHUD();render();requestAnimationFrame(loop)}
+function pointerToGame(e){const rect=canvas.getBoundingClientRect();const sx=GAME.width/rect.width,sy=GAME.height/rect.height;return{x:(e.clientX-rect.left)*sx,y:(e.clientY-rect.top)*sy}}
+function updateTouchIndicator(e,show){const p=pointerToGame(e);GAME.touch.x=clamp(p.x,0,GAME.width);GAME.touch.y=clamp(p.y,0,GAME.height);touchIndicator.style.left=`${(p.x/GAME.width)*100}%`;touchIndicator.style.top=`${(p.y/GAME.height)*100}%`;touchIndicator.classList.toggle('active',show)}
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture?.(e.pointerId);if(GAME.state==='ready'){GAME.touch.active=true;GAME.touch.id=e.pointerId;updateTouchIndicator(e,true);startCountdown();return}if(GAME.state==='gameover'||GAME.state==='win')return;GAME.touch.active=true;GAME.touch.id=e.pointerId;updateTouchIndicator(e,true)},{passive:false});canvas.addEventListener('pointermove',e=>{if(!GAME.touch.active||GAME.touch.id!==e.pointerId)return;e.preventDefault();updateTouchIndicator(e,true)},{passive:false});function endPointer(e){if(GAME.touch.id!==e.pointerId)return;GAME.touch.active=false;GAME.touch.id=null;touchIndicator.classList.remove('active')}canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer)
+window.addEventListener('keydown',e=>{const key=e.key.toLowerCase();GAME.keys[key]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(key))e.preventDefault();if((GAME.state==='ready'||GAME.state==='gameover'||GAME.state==='win')&&(key===' '||key==='enter')){if(performance.now()>=GAME.uiLockUntil)resetRoundAndStart()}if(GAME.state==='ready'&&(key===' '||key==='enter'))startCountdown();if((GAME.state==='gameover'||GAME.state==='win')&&key==='r'&&performance.now()>=GAME.uiLockUntil)resetRoundAndStart();if(key==='tab'){e.preventDefault();if(performance.now()>=GAME.uiLockUntil){if(GAME.mode==='campaign'){setMode('endless',0)}else{setMode('campaign',Math.min(GAME.stageIndex||0,2))}resetRound()}}});window.addEventListener('keyup',e=>{GAME.keys[e.key.toLowerCase()]=false})
+function resetRoundAndStart(){resetRound();startCountdown()}
+function showStartingState(){setMode(PROGRESS.lastMode||'campaign',PROGRESS.lastStage||0);resetRound()}
+window.GAME=GAME;GAME.bestCampaign=PROGRESS.campaignBest||0;GAME.bestEndless=PROGRESS.endlessBest||0;resetStars();syncPlayerStart();showStartingState();requestAnimationFrame(loop)
+</script>
 </body>
 </html>
