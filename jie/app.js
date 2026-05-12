@@ -13,17 +13,17 @@ const defaultState = {
 const emergencySteps = [
   {
     title: "先停 10 秒",
-    body: "把手机放低，双脚踩稳。现在不要做决定，只要先停住。",
+    body: "把手机放低，双脚踩稳。现在不用解决全部，只要先不行动。",
     cue: "停住"
   },
   {
     title: "慢呼吸 6 次",
-    body: "吸气，停一下，呼气。你不是要赢一整天，只是先赢这一分钟。",
+    body: "吸气，停一下，呼气。跟着节奏走，把这一分钟拿回来。",
     cue: "呼吸"
   },
   {
     title: "换一个动作",
-    body: "站起来喝水、洗脸、出门走两分钟，或者离开当前房间。",
+    body: "站起来喝水、洗脸、走到门口，或者离开当前房间。",
     cue: "离开"
   },
   {
@@ -216,6 +216,13 @@ function goalLabel() {
   return state.profile.privateName || "戒色";
 }
 
+function todayStatusLabel(record) {
+  if (!record) return "今日未记录";
+  if (record.status === "kept") return "今天已守住";
+  if (record.status === "lapsed") return "今天已复盘";
+  return "今天已记录";
+}
+
 function weekStrip() {
   const today = new Date();
   const items = [];
@@ -232,25 +239,24 @@ function weekStrip() {
 }
 
 function onboardingView() {
-  const today = todayKey();
   return `
     <section class="screen onboarding-screen">
       <div class="topbar">
-        <h1 class="brand">戒</h1>
+        <h1 class="brand app-mark">戒</h1>
         <span class="date-pill">${formatDate()}</span>
       </div>
-      <div class="hero-panel onboarding-hero">
+      <div class="hero-panel onboarding-hero ios-panel">
         <span class="section-kicker">自律，但不羞辱</span>
         <strong>先把这一刻稳住。</strong>
         <p class="subtle">在关键时刻停下来、记录下来，然后继续往前走。</p>
       </div>
       <h2 class="section-title">选择你的目标</h2>
       <div class="choice-grid">
-        <button class="choice" onclick="selectChoice('smoking', this)">
+        <button class="choice choice-card" onclick="selectChoice('smoking', this)">
           <b>戒烟</b>
           <span class="subtle">记录少抽、省钱和连续天数。</span>
         </button>
-        <button class="choice" onclick="selectChoice('focus', this)">
+        <button class="choice choice-card" onclick="selectChoice('focus', this)">
           <b>戒色</b>
           <span class="subtle">以冲动管理和专注恢复为核心。</span>
         </button>
@@ -266,7 +272,7 @@ function selectChoice(goal, element) {
   const label = goal === "smoking" ? "每日烟钱估算" : "隐私目标名称";
   const fields = document.querySelector("#setupFields");
   fields.innerHTML = `
-    <div class="setup-card">
+    <div class="setup-card ios-panel">
     <div class="field">
       <label>开始日期</label>
       <input id="startDate" type="date" value="${todayKey()}" />
@@ -291,13 +297,13 @@ function homeView() {
   return `
     <section class="screen home-screen">
       <div class="topbar">
-        <h1 class="brand compact-brand">戒</h1>
+        <h1 class="brand compact-brand app-mark">戒</h1>
         <span class="date-pill">${formatDate()}</span>
       </div>
-      <main class="today-hero" aria-label="今日状态">
+      <main class="today-hero status-stage" aria-label="今日状态">
         <div class="eyebrow-row">
           <span>${goalLabel()}</span>
-          <span class="status-dot ${todayRecord ? "done" : ""}">${todayRecord ? statusText(todayRecord) : "今日未记录"}</span>
+          <span class="status-dot ${todayRecord ? "done" : ""}">${todayStatusLabel(todayRecord)}</span>
         </div>
         <div class="day-display">
           <span>第</span>
@@ -308,7 +314,7 @@ function homeView() {
         <p class="reason-line">${escapeHtml(state.profile.reason || "为了重新拿回生活的主动权。")}</p>
         ${weekStrip()}
       </main>
-      <div class="home-actions" aria-label="今日动作">
+      <div class="home-actions action-dock" aria-label="今日动作">
         <button class="primary calm-action" onclick="saveRecord('kept')">
           <span>我守住了</span>
           <small>${todayRecord?.status === "kept" ? "今日已完成" : "记录今天"}</small>
@@ -318,7 +324,7 @@ function homeView() {
           <small>进入救急</small>
         </button>
       </div>
-      <div class="quiet-summary">
+      <div class="quiet-summary compact-metrics">
         <span>当前连续 ${currentStreak()} 天</span>
         <span>救急 ${state.emergencyCount} 次</span>
         <span>${todayRecord ? statusText(todayRecord) : "等待记录"}</span>
@@ -335,10 +341,10 @@ function recordView() {
   return `
     <section class="screen">
       <div class="topbar">
-        <h1 class="brand">今日记录</h1>
+        <h1 class="brand page-title">今日记录</h1>
         <span class="date-pill">${goalLabel()}</span>
       </div>
-      <div class="today-record-panel">
+      <div class="today-record-panel ios-panel">
         <span class="section-kicker">今天</span>
         <h2>${todayRecord ? statusText(todayRecord) : "还没有记录"}</h2>
         <p class="subtle">一屏完成。只记录事实，不评价自己。</p>
@@ -365,10 +371,10 @@ function statsView() {
   return `
     <section class="screen">
       <div class="topbar">
-        <h1 class="brand">统计</h1>
+        <h1 class="brand page-title">统计</h1>
         <span class="date-pill">${goalLabel()}</span>
       </div>
-      <div class="stat-hero">
+      <div class="stat-hero ios-panel">
         <span>当前连续</span>
         <strong>${currentStreak()}</strong>
         <small>天</small>
@@ -379,7 +385,7 @@ function statsView() {
         <div class="stat-line"><span>救急次数</span><strong>${state.emergencyCount}</strong></div>
         <div class="stat-line"><span>${saved.label}</span><strong>${saved.value}</strong></div>
       </div>
-      <div class="note-panel">
+      <div class="note-panel ios-panel">
         <h2>一次失败不等于归零。</h2>
         <p class="subtle">连续天数会重置，但累计成功、复盘经验和救急次数都会保留。</p>
       </div>
@@ -394,7 +400,7 @@ function settingsView() {
   return `
     <section class="screen">
       <div class="topbar">
-        <h1 class="brand">设置</h1>
+        <h1 class="brand page-title">设置</h1>
         <span class="date-pill">本地原型</span>
       </div>
       <h2 class="section-title first-title">目标</h2>
@@ -404,7 +410,7 @@ function settingsView() {
         <div class="status-row"><span>数据位置</span><strong>本机浏览器</strong></div>
       </div>
       <h2 class="section-title">基础设置</h2>
-      <div class="record-card stack">
+      <div class="record-card stack ios-panel">
         ${
           isSmoking
             ? `<div class="field"><label>每日烟钱估算</label><input id="settingsDailyCost" type="number" min="0" value="${Number(state.profile.dailyCost || 0)}" /></div>`
@@ -448,7 +454,7 @@ function statusText(record) {
 function recentRecords() {
   const rows = sortedRecords().slice(-5).reverse();
   if (!rows.length) return `<div class="empty">还没有记录。</div>`;
-  return `<div class="timeline">${rows.map(([date, record]) => `
+  return `<div class="timeline record-timeline">${rows.map(([date, record]) => `
     <div class="timeline-item ${record.status === "lapsed" ? "lapsed" : "kept"}">
       <span>${date}</span>
       <strong>${statusText(record)}</strong>
@@ -465,8 +471,8 @@ function tabs() {
     ["stats", "统计"],
     ["settings", "设置"]
   ];
-  return `<nav class="tabs">${items.map(([id, label]) => `
-    <button class="tab ${state.activeTab === id ? "active" : ""}" onclick="setTab('${id}')">${label}</button>
+  return `<nav class="tabs" aria-label="底部导航">${items.map(([id, label]) => `
+    <button class="tab ${state.activeTab === id ? "active" : ""}" data-tab="${id}" onclick="setTab('${id}')">${label}</button>
   `).join("")}</nav>`;
 }
 
@@ -497,6 +503,7 @@ function emergencyModal() {
           <span class="emergency-cue">${step.cue}</span>
           <h2>${step.title}</h2>
           <p>${step.body}</p>
+          <div class="breath-orb" aria-hidden="true"><span></span></div>
           <div class="breath-guide" aria-label="呼吸节奏">${breathBars}</div>
         </div>
         <p class="emergency-reason">${escapeHtml(state.profile.reason || "为了重新拿回生活的主动权。")}</p>
