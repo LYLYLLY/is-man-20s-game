@@ -1,0 +1,9 @@
+{
+  "name": "戒",
+  "short_name": "戒",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fffdf8",
+  "theme_color": "#24352f",
+  "description": "戒烟、戒色和冲动管理的本地原型"
+}
