@@ -7,7 +7,14 @@ const defaultState = {
   activeTab: "home",
   modal: null,
   emergencyStep: 0,
-  toast: null
+  toast: null,
+  reminder: {
+    enabled: false,
+    time: "21:30",
+    followupEnabled: true,
+    followupTime: "23:00",
+    permission: "default"
+  }
 };
 
 const emergencySteps = [
@@ -50,13 +57,26 @@ const motivationalLines = [
   "你不需要完美，只需要现在停下。"
 ];
 
+function baseState() {
+  return {
+    ...defaultState,
+    reminder: { ...defaultState.reminder }
+  };
+}
+
+let reminderTimers = [];
 let state = loadState();
 
 function loadState() {
   try {
-    return { ...defaultState, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    return {
+      ...baseState(),
+      ...saved,
+      reminder: { ...defaultState.reminder, ...(saved.reminder || {}) }
+    };
   } catch {
-    return { ...defaultState };
+    return baseState();
   }
 }
 
@@ -133,6 +153,84 @@ function motivationalLine() {
   return motivationalLines[index];
 }
 
+function todayRecord() {
+  return state.records[todayKey()] || null;
+}
+
+function isTodayClosed() {
+  return Boolean(todayRecord());
+}
+
+function reminderPermission() {
+  if (typeof Notification === "undefined") return "unsupported";
+  return Notification.permission;
+}
+
+function effectiveReminderPermission() {
+  return state.reminder.permission === "unsupported" ? "unsupported" : reminderPermission();
+}
+
+function reminderPermissionLabel() {
+  const permission = effectiveReminderPermission();
+  if (permission === "granted") return "已允许";
+  if (permission === "denied") return "已拒绝";
+  if (permission === "unsupported") return "浏览器不支持";
+  return "未请求";
+}
+
+function reminderSummary() {
+  if (!state.reminder.enabled) return "提醒未开启";
+  if (isTodayClosed()) return "今天已完成，不再提醒";
+  const permission = effectiveReminderPermission();
+  if (permission === "denied") return "提醒已开启，但通知权限被拒绝";
+  if (permission === "unsupported") return `未完成会在 ${state.reminder.time} 于当前页面内提示`;
+  if (permission === "default") return `提醒已开启，待允许通知权限（${state.reminder.time}）`;
+  const followup = state.reminder.followupEnabled ? `，补提醒 ${state.reminder.followupTime}` : "";
+  return `未完成会在 ${state.reminder.time} 提醒${followup}`;
+}
+
+function parseTodayTime(time) {
+  const [hours, minutes] = String(time || "").split(":").map(Number);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+  const target = new Date();
+  target.setHours(hours, minutes, 0, 0);
+  return target;
+}
+
+function clearReminderTimers() {
+  reminderTimers.forEach((timer) => clearTimeout(timer));
+  reminderTimers = [];
+}
+
+function fireReminder(message) {
+  if (isTodayClosed()) return;
+  if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+    new Notification("戒", {
+      body: message,
+      tag: `jie-${todayKey()}`
+    });
+    return;
+  }
+  showToast(message);
+}
+
+function scheduleReminderAt(time, message) {
+  const target = parseTodayTime(time);
+  if (!target) return;
+  const delay = target.getTime() - Date.now();
+  if (delay <= 0) return;
+  reminderTimers.push(setTimeout(() => fireReminder(message), delay));
+}
+
+function syncReminderSchedule() {
+  clearReminderTimers();
+  if (!state.profile || !state.reminder.enabled || isTodayClosed()) return;
+  scheduleReminderAt(state.reminder.time, "今天还没记录，先守住。");
+  if (state.reminder.followupEnabled) {
+    scheduleReminderAt(state.reminder.followupTime, "如果今天还没完成，现在补上。");
+  }
+}
+
 function setState(patch) {
   state = { ...state, ...patch };
   saveState();
@@ -166,6 +264,7 @@ function startProfile(goal) {
     tone: "disciplined_warm"
   };
   state.activeTab = "home";
+  state.reminder.permission = effectiveReminderPermission();
   saveState();
   render();
   showToast("目标已开始");
@@ -230,6 +329,27 @@ function nextEmergencyStep(result) {
   }
   saveState();
   render();
+}
+
+async function requestReminderPermission() {
+  if (typeof Notification === "undefined") {
+    state.reminder.permission = "unsupported";
+    saveState();
+    render();
+    showToast("当前浏览器不支持通知");
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  state.reminder.permission = permission;
+  saveState();
+  render();
+  showToast(permission === "granted" ? "通知已允许" : "通知未开启");
+}
+
+function testReminder() {
+  const message = "测试提醒：如果今天还没完成，现在补上。";
+  setTimeout(() => fireReminder(message), 1200);
+  showToast("1 秒后触发测试提醒");
 }
 
 function goalLabel() {
@@ -314,7 +434,7 @@ function selectChoice(goal, element) {
 }
 
 function homeView() {
-  const todayRecord = state.records[todayKey()];
+  const todayEntry = todayRecord();
   const startedDays = daysBetween(state.profile.startDate, todayKey()) + 1;
   return `
     <section class="screen home-screen">
@@ -325,7 +445,7 @@ function homeView() {
       <main class="today-hero status-stage" aria-label="今日状态">
         <div class="eyebrow-row">
           <span>${goalLabel()}</span>
-          <span class="status-dot ${todayRecord ? "done" : ""}">${todayStatusLabel(todayRecord)}</span>
+          <span class="status-dot ${todayEntry ? "done" : ""}">${todayStatusLabel(todayEntry)}</span>
         </div>
         <div class="day-display">
           <span>第</span>
@@ -334,6 +454,7 @@ function homeView() {
         </div>
         <p class="daily-line">今天先守住。</p>
         <p class="quote-line">${motivationalLine()}</p>
+        <p class="reminder-line">${reminderSummary()}</p>
       </main>
       <div class="home-actions action-dock simple-actions" aria-label="今日动作">
         <button class="primary urgent-action" onclick="openEmergency()">
@@ -342,7 +463,7 @@ function homeView() {
         </button>
         <button class="quiet calm-action" onclick="saveRecord('kept')">
           <span>我守住了</span>
-          <small>${todayRecord?.status === "kept" ? "今日已完成" : "记录今天"}</small>
+          <small>${todayEntry?.status === "kept" ? "今日已完成" : "记录今天"}</small>
         </button>
       </div>
       ${tabs()}
@@ -437,6 +558,33 @@ function settingsView() {
           <textarea id="settingsReason">${escapeHtml(state.profile.reason || "为了重新拿回生活的主动权。")}</textarea>
         </div>
         <button class="primary" onclick="saveSettings()">保存设置</button>
+      </div>
+      <h2 class="section-title">主动提醒</h2>
+      <div class="record-card stack ios-panel">
+        <label class="toggle-row">
+          <span>开启每日提醒</span>
+          <input id="reminderEnabled" type="checkbox" ${state.reminder.enabled ? "checked" : ""} />
+        </label>
+        <div class="field">
+          <label>首次提醒时间</label>
+          <input id="reminderTime" type="time" value="${state.reminder.time}" />
+        </div>
+        <label class="toggle-row">
+          <span>开启二次提醒</span>
+          <input id="followupEnabled" type="checkbox" ${state.reminder.followupEnabled ? "checked" : ""} />
+        </label>
+        <div class="field">
+          <label>二次提醒时间</label>
+          <input id="followupTime" type="time" value="${state.reminder.followupTime}" />
+        </div>
+        <div class="settings-list compact-settings-list">
+          <div class="status-row"><span>通知权限</span><strong>${reminderPermissionLabel()}</strong></div>
+          <div class="status-row"><span>今日提醒状态</span><strong>${reminderSummary()}</strong></div>
+        </div>
+        <div class="split-actions">
+          <button class="secondary" onclick="requestReminderPermission()">请求权限</button>
+          <button class="quiet" onclick="testReminder()">测试提醒</button>
+        </div>
       </div>
       <h2 class="section-title">隐私原则</h2>
       <div class="settings-list">
@@ -577,7 +725,7 @@ function setTab(tab) {
 
 function resetPrototype() {
   if (!confirm("确认重新开始？当前本地原型数据会被清空。")) return;
-  state = { ...defaultState };
+  state = baseState();
   saveState();
   render();
 }
@@ -589,7 +737,8 @@ function exportData() {
     data: {
       profile: state.profile,
       records: state.records,
-      emergencyCount: state.emergencyCount
+      emergencyCount: state.emergencyCount,
+      reminder: state.reminder
     }
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -609,6 +758,11 @@ function saveSettings() {
     state.profile.privateName = document.querySelector("#settingsPrivateName")?.value || "专注恢复";
   }
   state.profile.reason = document.querySelector("#settingsReason")?.value || "为了重新拿回生活的主动权。";
+  state.reminder.enabled = document.querySelector("#reminderEnabled")?.checked || false;
+  state.reminder.time = document.querySelector("#reminderTime")?.value || "21:30";
+  state.reminder.followupEnabled = document.querySelector("#followupEnabled")?.checked || false;
+  state.reminder.followupTime = document.querySelector("#followupTime")?.value || "23:00";
+  state.reminder.permission = effectiveReminderPermission();
   saveState();
   render();
   showToast("设置已保存");
@@ -625,14 +779,20 @@ function escapeHtml(value) {
 
 function render() {
   const app = document.querySelector("#app");
+  if (state.reminder.permission !== effectiveReminderPermission()) {
+    state.reminder.permission = effectiveReminderPermission();
+    saveState();
+  }
   if (!state.profile) {
     app.innerHTML = onboardingView();
+    syncReminderSchedule();
     return;
   }
   if (state.activeTab === "record" || state.activeTab === "review") app.innerHTML = recordView();
   else if (state.activeTab === "stats") app.innerHTML = statsView();
   else if (state.activeTab === "settings") app.innerHTML = settingsView();
   else app.innerHTML = homeView();
+  syncReminderSchedule();
 }
 
 render();
