@@ -17,6 +17,19 @@
   --dock: rgba(255, 255, 252, 0.86);
   --shadow: 0 18px 42px rgba(17, 17, 17, 0.08);
   --shadow-soft: 0 8px 24px rgba(17, 17, 17, 0.06);
+  --control-surface: color-mix(in srgb, var(--surface) 86%, transparent);
+  --button-primary-bg: var(--ink);
+  --button-primary-fg: #fff;
+  --button-secondary-bg: var(--accent-soft);
+  --button-secondary-fg: var(--accent);
+  --button-danger-bg: var(--danger-soft);
+  --button-danger-fg: var(--danger);
+  --button-quiet-bg: color-mix(in srgb, var(--surface) 86%, transparent);
+  --button-quiet-fg: var(--ink);
+  --button-quiet-line: var(--line);
+  --choice-active-bg: color-mix(in srgb, var(--surface) 86%, var(--ink) 14%);
+  --choice-active-line: var(--ink);
+  --app-shell-overlay: linear-gradient(180deg, rgba(255, 255, 252, 0.72), transparent 260px);
   --page-gutter: 20px;
   --page-top-space: 20px;
   --page-bottom-space: 108px;
@@ -72,9 +85,7 @@ button {
   min-height: 100svh;
   margin: 0 auto;
   overflow-x: hidden;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 252, 0.72), transparent 260px),
-    var(--surface);
+  background: var(--app-shell-overlay), var(--surface);
 }
 
 .screen {
@@ -332,24 +343,24 @@ button {
 }
 
 .primary {
-  background: var(--ink);
-  color: #fff;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-fg);
 }
 
 .secondary {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-fg);
 }
 
 .danger {
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--button-danger-bg);
+  color: var(--button-danger-fg);
 }
 
 .quiet {
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--line);
+  background: var(--button-quiet-bg);
+  color: var(--button-quiet-fg);
+  box-shadow: inset 0 0 0 1px var(--button-quiet-line);
 }
 
 .calm-action,
@@ -464,9 +475,9 @@ button {
 }
 
 .choice.active {
-  border-color: var(--ink);
-  background: color-mix(in srgb, var(--surface) 86%, var(--ink) 14%);
-  box-shadow: inset 0 0 0 1px var(--ink), var(--shadow-soft);
+  border-color: var(--choice-active-line);
+  background: var(--choice-active-bg);
+  box-shadow: inset 0 0 0 1px var(--choice-active-line), var(--shadow-soft);
 }
 
 .choice b {
@@ -502,7 +513,7 @@ button {
   min-height: var(--control-height);
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  background: var(--control-surface);
   color: var(--ink);
   padding: 15px 16px;
   font-size: var(--font-body);
@@ -1003,35 +1014,58 @@ button {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #11110f;
-    --surface: #171715;
-    --surface-soft: #22221f;
-    --surface-glass: rgba(28, 28, 25, 0.72);
-    --ink: #f3f2ed;
-    --muted: #aaa7a0;
-    --muted-soft: #77736c;
-    --line: rgba(255, 255, 255, 0.1);
-    --line-strong: rgba(255, 255, 255, 0.18);
-    --accent: #d09779;
-    --accent-soft: rgba(128, 82, 58, 0.3);
-    --good: #7bc29d;
-    --danger: #d38a7d;
-    --danger-soft: rgba(122, 65, 57, 0.32);
-    --dock: rgba(24, 24, 21, 0.86);
-    --shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
-    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.24);
+    --bg: #0f1012;
+    --surface: #14161a;
+    --surface-soft: #1b1e22;
+    --surface-glass: rgba(22, 24, 27, 0.78);
+    --ink: #e7e4de;
+    --muted: #a3a098;
+    --muted-soft: #6f6c66;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --accent: #b2876f;
+    --accent-soft: rgba(178, 135, 111, 0.14);
+    --good: #88b79e;
+    --danger: #a87672;
+    --danger-soft: rgba(168, 118, 114, 0.16);
+    --dock: rgba(19, 21, 24, 0.86);
+    --shadow: 0 18px 42px rgba(0, 0, 0, 0.38);
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.28);
+    --control-surface: rgba(29, 32, 36, 0.92);
+    --button-primary-bg: #beb8af;
+    --button-primary-fg: #111214;
+    --button-secondary-bg: #1d2024;
+    --button-secondary-fg: #d7d3cc;
+    --button-danger-bg: rgba(168, 118, 114, 0.16);
+    --button-danger-fg: #d3a6a1;
+    --button-quiet-bg: #1b1e22;
+    --button-quiet-fg: #d7d3cc;
+    --button-quiet-line: rgba(255, 255, 255, 0.08);
+    --choice-active-bg: rgba(231, 228, 222, 0.08);
+    --choice-active-line: rgba(231, 228, 222, 0.14);
+    --app-shell-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0) 240px);
   }
 
   body {
     background:
-      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), transparent 34%),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.022), transparent 34%),
       var(--bg);
+  }
+
+  .status-dot.done,
+  .chip.good {
+    background: rgba(136, 183, 158, 0.14);
+    color: #97cfb1;
+  }
+
+  .action-dock {
+    background: rgba(20, 22, 25, 0.9);
   }
 
   .field input,
   .field select,
   .field textarea {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
   }
 }
 
