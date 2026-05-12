@@ -14,23 +14,40 @@ const emergencySteps = [
   {
     title: "先停 10 秒",
     body: "把手机放低，双脚踩稳。现在不用解决全部，只要先不行动。",
-    cue: "停住"
+    cue: "停住",
+    quote: "冲动会过去，你不用跟它走。"
   },
   {
     title: "慢呼吸 6 次",
     body: "吸气，停一下，呼气。跟着节奏走，把这一分钟拿回来。",
-    cue: "呼吸"
+    cue: "呼吸",
+    quote: "先赢这一分钟。"
   },
   {
     title: "换一个动作",
     body: "站起来喝水、洗脸、走到门口，或者离开当前房间。",
-    cue: "离开"
+    cue: "离开",
+    quote: "不要和冲动辩论，先离开现场。"
   },
   {
     title: "做选择",
     body: "现在记录结果。撑过去就是一次胜利；还很难受，也先留下记录。",
-    cue: "记录"
+    cue: "记录",
+    quote: "你不需要完美，只需要现在停下。"
   }
+];
+
+const motivationalLines = [
+  "先赢这一分钟。",
+  "冲动会过去，你不用跟它走。",
+  "今天不是证明自己，只是守住下一步。",
+  "把手机放下，生活会回来一点。",
+  "你正在重新拿回主动权。",
+  "难受不是命令，它只是信号。",
+  "撑过这一阵，明天会轻一点。",
+  "不要和冲动辩论，先离开现场。",
+  "一次选择，会把你带回自己。",
+  "你不需要完美，只需要现在停下。"
 ];
 
 let state = loadState();
@@ -109,6 +126,11 @@ function savedMetric() {
     return { label: "估算省下", value: `¥${Math.round(kept * dailyCost)}` };
   }
   return { label: "专注恢复", value: `${kept}天` };
+}
+
+function motivationalLine() {
+  const index = daysBetween(state.profile?.startDate || todayKey(), todayKey()) % motivationalLines.length;
+  return motivationalLines[index];
 }
 
 function setState(patch) {
@@ -311,23 +333,17 @@ function homeView() {
           <span>天</span>
         </div>
         <p class="daily-line">今天先守住。</p>
-        <p class="reason-line">${escapeHtml(state.profile.reason || "为了重新拿回生活的主动权。")}</p>
-        ${weekStrip()}
+        <p class="quote-line">${motivationalLine()}</p>
       </main>
-      <div class="home-actions action-dock" aria-label="今日动作">
-        <button class="primary calm-action" onclick="saveRecord('kept')">
+      <div class="home-actions action-dock simple-actions" aria-label="今日动作">
+        <button class="primary urgent-action" onclick="openEmergency()">
+          <span>我有冲动</span>
+          <small>先撑过 1 分钟</small>
+        </button>
+        <button class="quiet calm-action" onclick="saveRecord('kept')">
           <span>我守住了</span>
           <small>${todayRecord?.status === "kept" ? "今日已完成" : "记录今天"}</small>
         </button>
-        <button class="secondary urgent-action" onclick="openEmergency()">
-          <span>我有冲动</span>
-          <small>进入救急</small>
-        </button>
-      </div>
-      <div class="quiet-summary compact-metrics">
-        <span>当前连续 ${currentStreak()} 天</span>
-        <span>救急 ${state.emergencyCount} 次</span>
-        <span>${todayRecord ? statusText(todayRecord) : "等待记录"}</span>
       </div>
       ${tabs()}
       ${modalView()}
@@ -503,6 +519,7 @@ function emergencyModal() {
           <span class="emergency-cue">${step.cue}</span>
           <h2>${step.title}</h2>
           <p>${step.body}</p>
+          <strong class="emergency-quote">${step.quote}</strong>
           <div class="breath-orb" aria-hidden="true"><span></span></div>
           <div class="breath-guide" aria-label="呼吸节奏">${breathBars}</div>
         </div>
