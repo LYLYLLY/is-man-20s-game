@@ -158,7 +158,8 @@ function todayRecord() {
 }
 
 function isTodayClosed() {
-  return Boolean(todayRecord());
+  const record = todayRecord();
+  return record?.status === "kept" || record?.status === "lapsed";
 }
 
 function reminderPermission() {
@@ -182,7 +183,7 @@ function reminderSummary() {
   if (!state.reminder.enabled) return "今晚还没设提醒";
   if (isTodayClosed()) return "今天已经记上，不再提醒";
   const permission = effectiveReminderPermission();
-  if (permission === "denied") return "提醒开了，但你没放权限";
+  if (permission === "denied") return "提醒开了，要去浏览器设置里放权限";
   if (permission === "unsupported") return `没记上的话，${state.reminder.time} 会在当前页顶你一下`;
   if (permission === "default") return `提醒开了，等你放权限（${state.reminder.time}）`;
   const followup = state.reminder.followupEnabled ? `，${state.reminder.followupTime} 再顶一次` : "";
@@ -279,6 +280,7 @@ function saveRecord(status) {
     return;
   }
   state.records[key] = {
+    ...(state.records[key] || {}),
     status: "kept",
     note: "今天我赢了",
     updatedAt: new Date().toISOString()
@@ -292,6 +294,7 @@ function saveRecord(status) {
 function saveRelapse() {
   const key = todayKey();
   state.records[key] = {
+    ...(state.records[key] || {}),
     status: "lapsed",
     trigger: document.querySelector("#trigger")?.value || "未记录",
     mood: document.querySelector("#mood")?.value || "未记录",
@@ -314,15 +317,27 @@ function openEmergency() {
 
 function nextEmergencyStep(result) {
   if (result) {
+    const key = todayKey();
     state.emergencyCount += 1;
-    state.records[todayKey()] = {
-      ...(state.records[todayKey()] || {}),
+    state.records[key] = {
+      ...(state.records[key] || {}),
       emergencyResult: result,
       emergencyAt: new Date().toISOString()
     };
+    if (result === "held") {
+      state.records[key] = {
+        ...state.records[key],
+        status: "kept",
+        note: "从救急里拉回来了",
+        updatedAt: new Date().toISOString()
+      };
+    }
     state.modal = null;
     state.emergencyStep = 0;
-    if (result === "still_hard") state.activeTab = "record";
+    if (result === "still_hard") {
+      state.activeTab = "record";
+      state.modal = "relapse";
+    }
     showToast(result === "held" ? "这次你赢了" : "先把这把记下来");
   } else {
     state.emergencyStep = Math.min(state.emergencyStep + 1, emergencySteps.length - 1);
@@ -362,7 +377,8 @@ function todayStatusLabel(record) {
   if (!record) return "今天还没交成绩";
   if (record.status === "kept") return "今天记上了";
   if (record.status === "lapsed") return "今天掉了";
-  return "今天有记录";
+  if (record.emergencyResult === "still_hard") return "还没收口";
+  return "还没交成绩";
 }
 
 function weekStrip() {
@@ -612,7 +628,8 @@ function settingsView() {
 function statusText(record) {
   if (record.status === "kept") return "赢了";
   if (record.status === "lapsed") return "掉了";
-  return "记上了";
+  if (record.emergencyResult === "still_hard") return "还没收口";
+  return "还没交成绩";
 }
 
 function recentRecords() {
