@@ -45,16 +45,47 @@ const emergencySteps = [
 ];
 
 const motivationalLines = [
-  "先把这一分钟拿下。",
-  "别让它拿走今天。",
-  "今天别输。",
-  "先停手，别把今天送出去。",
-  "撑住这一下，今天还在你手里。",
-  "你不是想要它，你是在跟它拉扯。",
-  "这一把还没输。",
-  "别站在坑边装稳，先离开现场。",
+  "把手机扣下，局还没输。",
+  "先停手，局就还在。",
+  "防线不靠嘴，靠这一分钟。",
+  "把手机扣下，别谈道理。",
+  "欲望上桌，你就离席。",
+  "今天要的是收口，不是借口。",
+  "硬一次，战绩就多一笔。",
+  "别站在坑边证明自己稳。",
   "把这一分钟抢回来。",
-  "赢的不是感觉，是这次没交出去。"
+  "赢的不是感觉，是没交出去。"
+];
+
+const quoteDeck = [
+  {
+    line: "自胜者强。",
+    source: "老子《道德经》第三十三章"
+  },
+  {
+    line: "能管住自己的判断，才不被外物牵走。",
+    source: "爱比克泰德《手册》意译"
+  },
+  {
+    line: "真正算数的，是站在场里的人。",
+    source: "西奥多·罗斯福《竞技场上的人》意译"
+  },
+  {
+    line: "你能管住的是自己的心，不是外面的风浪。",
+    source: "马可·奥勒留《沉思录》意译"
+  },
+  {
+    line: "先稳住自己，再谈赢别人。",
+    source: "《道德经》第三十三章意译"
+  },
+  {
+    line: "该做的事，不等状态好才做。",
+    source: "斯多葛训练意译"
+  },
+  {
+    line: "失败可以记，借口不能留。",
+    source: "戒 UI4 训练句"
+  }
 ];
 
 function baseState() {
@@ -151,6 +182,11 @@ function savedMetric() {
 function motivationalLine() {
   const index = daysBetween(state.profile?.startDate || todayKey(), todayKey()) % motivationalLines.length;
   return motivationalLines[index];
+}
+
+function quoteOfDay() {
+  const index = daysBetween(state.profile?.startDate || todayKey(), todayKey()) % quoteDeck.length;
+  return quoteDeck[index];
 }
 
 function todayRecord() {
@@ -254,7 +290,7 @@ function showToast(message) {
 function startProfile(goal) {
   const dailyCost = goal === "smoking" ? Number(document.querySelector("#dailyCost")?.value || 25) : 0;
   const privateName = goal === "focus" ? (document.querySelector("#privateName")?.value || "专注恢复") : "";
-  const reason = document.querySelector("#reason")?.value || "为了别再把时间和状态送出去。";
+  const reason = document.querySelector("#reason")?.value || "我要把注意力和状态拿回来。";
   const startDate = document.querySelector("#startDate")?.value || todayKey();
   state.profile = {
     goal,
@@ -401,22 +437,22 @@ function onboardingView() {
     <section class="screen onboarding-screen">
       <div class="topbar">
         <h1 class="brand app-mark">戒</h1>
-        <span class="date-pill">${formatDate()}</span>
+        <span class="date-pill">红区训练</span>
       </div>
       <div class="hero-panel onboarding-hero ios-panel">
-        <span class="section-kicker">硬一点，别输</span>
-        <strong>先别把今天交出去。</strong>
-        <p class="subtle">在最容易上头的时候拉住自己，把今天记上。</p>
+        <span class="section-kicker">冲动管理 / 自控训练</span>
+        <strong>别输给那一下。</strong>
+        <p class="subtle">不讲大道理。冲动上桌，你就离席；先把这一分钟抢回来。</p>
       </div>
-      <h2 class="section-title">选择你的目标</h2>
+      <h2 class="section-title">选战场</h2>
       <div class="choice-grid">
         <button class="choice choice-card" onclick="selectChoice('smoking', this)">
           <b>戒烟</b>
-          <span class="subtle">记录少抽、省钱和连胜。</span>
+          <span class="subtle">少烧一根，防线就厚一层。</span>
         </button>
         <button class="choice choice-card" onclick="selectChoice('focus', this)">
-          <b>戒色</b>
-          <span class="subtle">以冲动管理和连胜为核心。</span>
+          <b>戒色 / 专注</b>
+          <span class="subtle">少送一次，把状态拿回来。</span>
         </button>
       </div>
       <div id="setupFields" class="stack"></div>
@@ -441,8 +477,8 @@ function selectChoice(goal, element) {
         : `<div class="field"><label>${label}</label><input id="privateName" type="text" value="专注恢复" /></div>`
     }
     <div class="field">
-      <label>你为什么不想再输</label>
-      <textarea id="reason">为了别再把时间和状态送出去。</textarea>
+      <label>你为什么不能再输</label>
+      <textarea id="reason">我要把注意力和状态拿回来。</textarea>
     </div>
     <button class="primary" onclick="startProfile('${goal}')">开打</button>
     </div>
@@ -452,11 +488,12 @@ function selectChoice(goal, element) {
 function homeView() {
   const todayEntry = todayRecord();
   const startedDays = daysBetween(state.profile.startDate, todayKey()) + 1;
+  const quote = quoteOfDay();
   return `
     <section class="screen home-screen">
       <div class="topbar">
         <h1 class="brand compact-brand app-mark">戒</h1>
-        <span class="date-pill">${formatDate()}</span>
+        <span class="date-pill">今日战局</span>
       </div>
       <main class="today-hero status-stage" aria-label="今日状态">
         <div class="eyebrow-row">
@@ -468,18 +505,23 @@ function homeView() {
           <strong>${startedDays}</strong>
           <span>天</span>
         </div>
-        <p class="daily-line">今天别输。</p>
+        <p class="daily-line">别输给那一下。</p>
         <p class="quote-line">${motivationalLine()}</p>
+        <div class="quote-card">
+          <span>硬话</span>
+          <strong>${quote.line}</strong>
+          <small>${quote.source}</small>
+        </div>
         <p class="reminder-line">${reminderSummary()}</p>
       </main>
       <div class="home-actions action-dock simple-actions" aria-label="今日动作">
         <button class="primary urgent-action" onclick="openEmergency()">
-          <span>我又上头了</span>
-          <small>先把这一分钟拿下</small>
+          <span>红区了</span>
+          <small>马上拉回</small>
         </button>
         <button class="quiet calm-action" onclick="saveRecord('kept')">
-          <span>我赢了</span>
-          <small>${todayEntry?.status === "kept" ? "今天已经记上" : "把今天记上"}</small>
+          <span>今天拿下</span>
+          <small>${todayEntry?.status === "kept" ? "战绩已记" : "记一笔胜场"}</small>
         </button>
       </div>
       ${tabs()}
@@ -498,17 +540,17 @@ function recordView() {
         <span class="date-pill">${goalLabel()}</span>
       </div>
       <div class="today-record-panel ios-panel">
-        <span class="section-kicker">今天这把</span>
+        <span class="section-kicker">今日战局</span>
         <h2>${todayRecord ? statusText(todayRecord) : "还没交成绩"}</h2>
-        <p class="subtle">一屏收口。记事实，别装没发生。</p>
+        <p class="subtle">一屏收口。赢就记胜，掉就复盘，不留借口。</p>
         <div class="split-actions">
-          <button class="secondary" onclick="saveRecord('kept')">今天我赢了</button>
-          <button class="danger" onclick="saveRecord('lapsed')">哪里松了</button>
+          <button class="secondary" onclick="saveRecord('kept')">记一笔胜场</button>
+          <button class="danger" onclick="saveRecord('lapsed')">复盘败局</button>
         </div>
       </div>
       <div class="record-hint">
-        <span>连胜会变</span>
-        <span>这把会记住</span>
+        <span>胜场会累</span>
+        <span>败局要拆</span>
       </div>
       <h2 class="section-title">最近几把</h2>
       ${recentRecords()}
@@ -528,19 +570,19 @@ function statsView() {
         <span class="date-pill">${goalLabel()}</span>
       </div>
       <div class="stat-hero ios-panel">
-        <span>当前连续</span>
+        <span>当前连胜</span>
         <strong>${currentStreak()}</strong>
         <small>天</small>
       </div>
       <div class="stats-list">
-        <div class="stat-line"><span>总赢下来的天数</span><strong>${totalKeptDays()}</strong></div>
-        <div class="stat-line"><span>掉回去的次数</span><strong>${lapseCount()}</strong></div>
-        <div class="stat-line"><span>硬拉回来的次数</span><strong>${state.emergencyCount}</strong></div>
+        <div class="stat-line"><span>胜场总数</span><strong>${totalKeptDays()}</strong></div>
+        <div class="stat-line"><span>败局复盘</span><strong>${lapseCount()}</strong></div>
+        <div class="stat-line"><span>红区拉回</span><strong>${state.emergencyCount}</strong></div>
         <div class="stat-line"><span>${saved.label}</span><strong>${saved.value}</strong></div>
       </div>
       <div class="note-panel ios-panel">
-        <h2>掉一次，不等于后面都没了。</h2>
-        <p class="subtle">连胜会断，但赢下来的天数、记住的教训和拉回来的次数都还在。</p>
+        <h2>败局不是结案，复盘才是收口。</h2>
+        <p class="subtle">连胜会断，但胜场、教训和拉回来的次数都还在。别让一次掉线变成整天失守。</p>
       </div>
       ${tabs()}
       ${toastView()}
@@ -570,27 +612,27 @@ function settingsView() {
             : `<div class="field"><label>目标名字</label><input id="settingsPrivateName" value="${escapeHtml(state.profile.privateName || "专注恢复")}" /></div>`
         }
         <div class="field">
-          <label>你为什么不想再输</label>
-          <textarea id="settingsReason">${escapeHtml(state.profile.reason || "为了别再把时间和状态送出去。")}</textarea>
+          <label>你为什么不能再输</label>
+          <textarea id="settingsReason">${escapeHtml(state.profile.reason || "我要把注意力和状态拿回来。")}</textarea>
         </div>
-        <button class="primary" onclick="saveSettings()">把这套定住</button>
+        <button class="primary" onclick="saveSettings()">锁定底线</button>
       </div>
       <h2 class="section-title">晚点顶我</h2>
       <div class="record-card stack ios-panel">
         <label class="toggle-row">
-          <span>到点提醒我</span>
+          <span>到点顶我</span>
           <input id="reminderEnabled" type="checkbox" ${state.reminder.enabled ? "checked" : ""} />
         </label>
         <div class="field">
-          <label>第一次提醒时间</label>
+          <label>第一道警报</label>
           <input id="reminderTime" type="time" value="${state.reminder.time}" />
         </div>
         <label class="toggle-row">
-          <span>再补一次</span>
+          <span>再压一次</span>
           <input id="followupEnabled" type="checkbox" ${state.reminder.followupEnabled ? "checked" : ""} />
         </label>
         <div class="field">
-          <label>第二次提醒时间</label>
+          <label>第二道警报</label>
           <input id="followupTime" type="time" value="${state.reminder.followupTime}" />
         </div>
         <div class="settings-list compact-settings-list">
@@ -598,8 +640,8 @@ function settingsView() {
           <div class="status-row"><span>今晚状态</span><strong>${reminderSummary()}</strong></div>
         </div>
         <div class="split-actions">
-          <button class="secondary" onclick="requestReminderPermission()">把权限打开</button>
-          <button class="quiet" onclick="testReminder()">试一下</button>
+          <button class="secondary" onclick="requestReminderPermission()">打开警报权限</button>
+          <button class="quiet" onclick="testReminder()">试响</button>
         </div>
       </div>
       <h2 class="section-title">边界</h2>
@@ -610,7 +652,7 @@ function settingsView() {
       </div>
       <h2 class="section-title">留底</h2>
       <div class="stack">
-        <button class="secondary" onclick="exportData()">导出这份记录</button>
+        <button class="secondary" onclick="exportData()">导出战绩</button>
         <button class="quiet" onclick="resetPrototype()">全部重开</button>
       </div>
       <h2 class="section-title">后面要上的东西</h2>
@@ -647,7 +689,7 @@ function recentRecords() {
 
 function tabs() {
   const items = [
-    ["home", "今天"],
+    ["home", "战局"],
     ["record", "战绩"],
     ["stats", "连胜"],
     ["settings", "自控"]
@@ -676,7 +718,7 @@ function emergencyModal() {
     <div class="overlay emergency-overlay">
       <div class="modal emergency-sheet">
         <div class="emergency-top">
-          <span>拉回 ${state.emergencyStep + 1}/${emergencySteps.length}</span>
+          <span>红区拉回 ${state.emergencyStep + 1}/${emergencySteps.length}</span>
           <button class="icon-close" aria-label="退出拉回" onclick="setState({ modal: null, emergencyStep: 0 })">退出</button>
         </div>
         <div class="progress hairline-progress" style="--progress:${progress}"><div></div></div>
@@ -688,13 +730,13 @@ function emergencyModal() {
           <div class="breath-orb" aria-hidden="true"><span></span></div>
           <div class="breath-guide" aria-label="呼吸节奏">${breathBars}</div>
         </div>
-        <p class="emergency-reason">${escapeHtml(state.profile.reason || "为了别再把时间和状态送出去。")}</p>
+        <p class="emergency-reason">${escapeHtml(state.profile.reason || "我要把注意力和状态拿回来。")}</p>
         <div class="stack emergency-actions">
           ${
             final
-              ? `<button class="secondary" onclick="nextEmergencyStep('held')">这次我赢了</button>
-                 <button class="quiet" onclick="nextEmergencyStep('still_hard')">这次掉了，先记上</button>`
-              : `<button class="primary" onclick="nextEmergencyStep()">继续顶住</button>`
+              ? `<button class="secondary" onclick="nextEmergencyStep('held')">拉回来了</button>
+                 <button class="quiet" onclick="nextEmergencyStep('still_hard')">掉了，复盘</button>`
+              : `<button class="primary" onclick="nextEmergencyStep()">继续压住</button>`
           }
         </div>
       </div>
@@ -706,10 +748,10 @@ function relapseModal() {
   return `
     <div class="overlay">
       <div class="modal review-modal">
-        <h2>这把怎么掉的</h2>
-        <p class="subtle">别绕。只填三件事：起头、状态、下次卡哪一步。</p>
+        <h2>败局拆开</h2>
+        <p class="subtle">不骂自己，也不放过漏洞。只拆三件事：起头、状态、下次卡哪一步。</p>
         <div class="field">
-          <label>是哪一下起的头</label>
+          <label>哪个口子先破</label>
           <select id="trigger">
             <option>压力</option>
             <option>无聊</option>
@@ -720,15 +762,15 @@ function relapseModal() {
           </select>
         </div>
         <div class="field">
-          <label>当时你什么状态</label>
+          <label>当时状态</label>
           <input id="mood" value="焦虑" />
         </div>
         <div class="field">
-          <label>下次先卡哪一步</label>
-          <textarea id="plan">先打开拉回流程，离开当前环境。</textarea>
+          <label>下次先封哪一步</label>
+          <textarea id="plan">先打开红区拉回，离开当前环境。</textarea>
         </div>
         <div class="stack">
-          <button class="primary" onclick="saveRelapse()">记住这把</button>
+          <button class="primary" onclick="saveRelapse()">封住这个口子</button>
           <button class="quiet" onclick="setState({ modal: null })">先放这</button>
         </div>
       </div>

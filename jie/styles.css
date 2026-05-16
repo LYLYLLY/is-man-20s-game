@@ -1,35 +1,37 @@
 :root {
   color-scheme: light dark;
-  --bg: #f6f6f3;
-  --surface: #fdfdf9;
-  --surface-soft: #efeee9;
-  --surface-glass: rgba(255, 255, 252, 0.78);
-  --ink: #111111;
-  --muted: #73736f;
-  --muted-soft: #a7a49d;
-  --line: rgba(30, 30, 30, 0.1);
-  --line-strong: rgba(30, 30, 30, 0.18);
-  --accent: #9f6044;
-  --accent-soft: #f0e4dc;
-  --good: #2f6f52;
-  --danger: #9d4d42;
-  --danger-soft: #f1ded9;
-  --dock: rgba(255, 255, 252, 0.86);
-  --shadow: 0 18px 42px rgba(17, 17, 17, 0.08);
-  --shadow-soft: 0 8px 24px rgba(17, 17, 17, 0.06);
+  --bg: #100f0d;
+  --surface: #181613;
+  --surface-soft: #24211b;
+  --surface-glass: rgba(28, 25, 20, 0.84);
+  --ink: #f4efe5;
+  --muted: #aa9f8f;
+  --muted-soft: #746b5f;
+  --line: rgba(244, 239, 229, 0.1);
+  --line-strong: rgba(244, 239, 229, 0.18);
+  --accent: #d57a2c;
+  --accent-soft: rgba(213, 122, 44, 0.16);
+  --good: #8ba66a;
+  --danger: #b63a2d;
+  --danger-soft: rgba(182, 58, 45, 0.18);
+  --dock: rgba(18, 16, 13, 0.9);
+  --shadow: 0 20px 48px rgba(0, 0, 0, 0.46);
+  --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.34);
   --control-surface: color-mix(in srgb, var(--surface) 86%, transparent);
-  --button-primary-bg: var(--ink);
-  --button-primary-fg: #fff;
-  --button-secondary-bg: var(--accent-soft);
-  --button-secondary-fg: var(--accent);
+  --button-primary-bg: linear-gradient(135deg, #d57a2c, #a83326);
+  --button-primary-fg: #fff8ec;
+  --button-secondary-bg: rgba(213, 122, 44, 0.17);
+  --button-secondary-fg: #f1a866;
   --button-danger-bg: var(--danger-soft);
-  --button-danger-fg: var(--danger);
-  --button-quiet-bg: color-mix(in srgb, var(--surface) 86%, transparent);
+  --button-danger-fg: #e47a70;
+  --button-quiet-bg: rgba(244, 239, 229, 0.055);
   --button-quiet-fg: var(--ink);
   --button-quiet-line: var(--line);
-  --choice-active-bg: color-mix(in srgb, var(--surface) 86%, var(--ink) 14%);
-  --choice-active-line: var(--ink);
-  --app-shell-overlay: linear-gradient(180deg, rgba(255, 255, 252, 0.72), transparent 260px);
+  --choice-active-bg: rgba(213, 122, 44, 0.13);
+  --choice-active-line: rgba(213, 122, 44, 0.7);
+  --app-shell-overlay:
+    radial-gradient(circle at 50% 0%, rgba(213, 122, 44, 0.18), transparent 280px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0) 260px);
   --page-gutter: 20px;
   --page-top-space: 20px;
   --page-bottom-space: 108px;
@@ -57,7 +59,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.92), transparent 36%),
+    radial-gradient(circle at 50% 0%, rgba(213, 122, 44, 0.13), transparent 35%),
+    linear-gradient(180deg, #100f0d, #17130f 52%, #0d0c0b),
     var(--bg);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
@@ -86,6 +89,7 @@ button {
   margin: 0 auto;
   overflow-x: hidden;
   background: var(--app-shell-overlay), var(--surface);
+  box-shadow: 0 0 0 1px rgba(244, 239, 229, 0.08), 0 28px 80px rgba(0, 0, 0, 0.38);
 }
 
 .screen {
@@ -122,7 +126,7 @@ button {
   margin: 0;
   color: var(--ink);
   font-size: 30px;
-  font-weight: 760;
+  font-weight: 820;
   line-height: 1;
 }
 
@@ -151,7 +155,8 @@ button {
   background: var(--surface-soft);
   color: var(--muted);
   font-size: var(--font-caption);
-  font-weight: 560;
+  font-weight: 720;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -230,8 +235,8 @@ button {
 }
 
 .day-display strong {
-  font-size: 132px;
-  font-weight: 780;
+  font-size: 138px;
+  font-weight: 860;
   line-height: 0.88;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
@@ -240,8 +245,8 @@ button {
 .daily-line {
   margin: 24px 0 0;
   text-align: center;
-  font-size: 24px;
-  font-weight: 650;
+  font-size: 28px;
+  font-weight: 820;
   line-height: 1.2;
 }
 
@@ -251,8 +256,42 @@ button {
   color: var(--muted);
   text-align: center;
   font-size: 17px;
-  font-weight: 560;
+  font-weight: 680;
   line-height: 1.55;
+}
+
+.quote-card {
+  display: grid;
+  gap: 6px;
+  width: min(100%, 330px);
+  margin: 22px auto 0;
+  border: 1px solid rgba(213, 122, 44, 0.24);
+  border-radius: calc(var(--radius-panel) - 6px);
+  padding: 16px 18px;
+  background:
+    linear-gradient(135deg, rgba(213, 122, 44, 0.13), rgba(182, 58, 45, 0.08)),
+    rgba(244, 239, 229, 0.035);
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.quote-card span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.quote-card strong {
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 830;
+  line-height: 1.32;
+}
+
+.quote-card small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .reminder-line {
@@ -345,6 +384,7 @@ button {
 .primary {
   background: var(--button-primary-bg);
   color: var(--button-primary-fg);
+  box-shadow: 0 14px 32px rgba(182, 58, 45, 0.24);
 }
 
 .secondary {
@@ -416,7 +456,9 @@ button {
 .empty {
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
-  background: var(--surface-glass);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0)),
+    var(--surface-glass);
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(18px);
 }
@@ -447,7 +489,7 @@ button {
 .onboarding-hero strong {
   max-width: 280px;
   margin-top: 10px;
-  font-size: 36px;
+  font-size: 40px;
   line-height: 1.12;
 }
 
@@ -483,7 +525,7 @@ button {
 .choice b {
   display: block;
   margin-bottom: 8px;
-  font-size: 23px;
+  font-size: 25px;
   letter-spacing: 0;
 }
 
@@ -675,7 +717,7 @@ button {
 }
 
 .stat-hero strong {
-  font-size: 112px;
+  font-size: 118px;
   line-height: 0.88;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
@@ -987,6 +1029,14 @@ button {
   text-align: center;
 }
 
+.simple-actions .urgent-action {
+  min-height: 88px;
+}
+
+.simple-actions .calm-action {
+  min-height: 88px;
+}
+
 .simple-actions .urgent-action span,
 .simple-actions .calm-action span {
   font-size: 19px;
@@ -1014,41 +1064,38 @@ button {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1012;
-    --surface: #14161a;
-    --surface-soft: #1b1e22;
-    --surface-glass: rgba(22, 24, 27, 0.78);
-    --ink: #e7e4de;
-    --muted: #a3a098;
-    --muted-soft: #6f6c66;
-    --line: rgba(255, 255, 255, 0.08);
-    --line-strong: rgba(255, 255, 255, 0.14);
-    --accent: #b2876f;
-    --accent-soft: rgba(178, 135, 111, 0.14);
-    --good: #88b79e;
-    --danger: #a87672;
-    --danger-soft: rgba(168, 118, 114, 0.16);
-    --dock: rgba(19, 21, 24, 0.86);
-    --shadow: 0 18px 42px rgba(0, 0, 0, 0.38);
-    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.28);
-    --control-surface: rgba(29, 32, 36, 0.92);
-    --button-primary-bg: #beb8af;
-    --button-primary-fg: #111214;
-    --button-secondary-bg: #1d2024;
-    --button-secondary-fg: #d7d3cc;
-    --button-danger-bg: rgba(168, 118, 114, 0.16);
-    --button-danger-fg: #d3a6a1;
-    --button-quiet-bg: #1b1e22;
-    --button-quiet-fg: #d7d3cc;
-    --button-quiet-line: rgba(255, 255, 255, 0.08);
-    --choice-active-bg: rgba(231, 228, 222, 0.08);
-    --choice-active-line: rgba(231, 228, 222, 0.14);
-    --app-shell-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0) 240px);
+    --bg: #100f0d;
+    --surface: #181613;
+    --surface-soft: #24211b;
+    --surface-glass: rgba(28, 25, 20, 0.84);
+    --ink: #f4efe5;
+    --muted: #aa9f8f;
+    --muted-soft: #746b5f;
+    --line: rgba(244, 239, 229, 0.1);
+    --line-strong: rgba(244, 239, 229, 0.18);
+    --accent: #d57a2c;
+    --accent-soft: rgba(213, 122, 44, 0.16);
+    --good: #8ba66a;
+    --danger: #b63a2d;
+    --danger-soft: rgba(182, 58, 45, 0.18);
+    --dock: rgba(18, 16, 13, 0.9);
+    --button-primary-bg: linear-gradient(135deg, #d57a2c, #a83326);
+    --button-primary-fg: #fff8ec;
+    --button-secondary-bg: rgba(213, 122, 44, 0.17);
+    --button-secondary-fg: #f1a866;
+    --button-danger-bg: rgba(182, 58, 45, 0.18);
+    --button-danger-fg: #e47a70;
+    --button-quiet-bg: rgba(244, 239, 229, 0.055);
+    --button-quiet-fg: #f4efe5;
+    --button-quiet-line: rgba(244, 239, 229, 0.1);
+    --choice-active-bg: rgba(213, 122, 44, 0.13);
+    --choice-active-line: rgba(213, 122, 44, 0.7);
   }
 
   body {
     background:
-      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.022), transparent 34%),
+      radial-gradient(circle at 50% 0%, rgba(213, 122, 44, 0.13), transparent 35%),
+      linear-gradient(180deg, #100f0d, #17130f 52%, #0d0c0b),
       var(--bg);
   }
 
